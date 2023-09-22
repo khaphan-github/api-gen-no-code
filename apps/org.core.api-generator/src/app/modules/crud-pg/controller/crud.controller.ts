@@ -5,6 +5,8 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateDataCommand } from '../commands/create..command';
 import { GetDataQuery } from '../queries/get-one.query';
 import { ConditionObject } from '../../../domain/db.query.domain';
+import { DeleteDataCommand } from '../commands/delete.command';
+import { GetSchemaStructureQuery } from '../queries/get-schema-structure.query';
 
 @ApiTags('CRUD operator')
 @Controller('app/:appid/schema/:schema')
@@ -66,15 +68,11 @@ export class CrudController {
   deleteById(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
-    @Param('id') id: string
+    @Param('id') id: number
   ) {
-    return {
-      method: "delete",
-      appId: appId,
-      schema: schema,
-      id: id
-    };
+    return this.commandBus.execute(new DeleteDataCommand(appId, schema, id));
   }
+
   @Post()
   @ApiBody({
     schema: {
@@ -107,5 +105,13 @@ export class CrudController {
       id: id,
       data: data
     };
+  }
+
+  @Get('structure')
+  getSchemaInfo(
+    @Param('appid') appId: string,
+    @Param('schema') schema: string
+  ) {
+    return this.queryBus.execute(new GetSchemaStructureQuery(appId, schema));
   }
 }
