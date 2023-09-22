@@ -7,17 +7,17 @@ https://docs.nestjs.com/modules
 import { Module } from '@nestjs/common';
 import { QueryHandlers } from './queries';
 import { CqrsModule } from '@nestjs/cqrs';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { JsonIoService } from '../shared/json.io.service';
 
 @Module({
     imports: [
         CqrsModule,
-        TypeOrmModule,
     ],
     controllers: [GeneratorController,],
     providers: [
         ...CommandHandlers,
         ...QueryHandlers,
+        JsonIoService
     ],
 })
 export class GeneratorModule { }

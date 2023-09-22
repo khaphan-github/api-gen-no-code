@@ -1,7 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { QueryFilterDto } from './query-filter.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { CreateDataCommand } from '../commands/create..command';
 
 @ApiTags('CRUD operator')
 @Controller('app/:appid/schema/:schema')
@@ -56,20 +57,21 @@ export class CrudController {
       id: id
     };
   }
-
   @Post()
+  @ApiBody({
+    schema: {
+      example: {
+        product_name: 'Sản phẩm test 1',
+        description: 'Đây là sản phẩm có năng lực thần kỳ'
+      }
+    }
+  })
   create(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
     @Body() data: object
   ) {
-
-    return {
-      statusCode: 1,
-      message: appId,
-      schema: schema,
-      body: data
-    };
+    return this.commandBus.execute(new CreateDataCommand(appId, schema, data));
   }
 
 

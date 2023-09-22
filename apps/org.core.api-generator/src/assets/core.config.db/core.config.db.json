@@ -1,0 +1,116 @@
+{
+  "applications": [
+    {
+      "id": 1293810924,
+      "ownerID": "198247891729847198247",
+      "name": "Catalog management",
+      "database": "pg",
+      "schemas": [
+        {
+          "name": "product",
+          "desc": "Bảng quản lý sản phẩm",
+          "attributes": [
+            {
+              "name": "id",
+              "datatype": "int",
+              "max": 10,
+              "min": 1
+            },
+            {
+              "name": "product_name",
+              "datatype": "string",
+              "max": 100,
+              "min": 1
+            },
+            {
+              "name": "seo_image_link",
+              "datatype": "string"
+            },
+            {
+              "name": "category_id",
+              "relationships": {
+                "schema": "category",
+                "key": "_id",
+                "type": "many_to_one"
+              },
+              "datatype": "string"
+            }
+          ],
+          "status": "created"
+        }
+      ],
+      "endpoints": [
+        {
+          "name": "Create product",
+          "desc": "Api tạo mới một sản phẩm",
+          "requestAttributes": {
+            "body": [
+              {
+                "key": "product_name",
+                "example": {
+                  "product_name": "product_name"
+                },
+                "desc": "Tên sản phẩm",
+                "type": "string",
+                "required": true
+              }
+            ],
+            "header": [
+              {
+                "key": "Authorizations",
+                "required": false
+              },
+              {
+                "key": "ApiKey",
+                "required": true
+              },
+              {
+                "key": "Secret-Key",
+                "required": true
+              }
+            ],
+            "params": [
+              {
+                "key": "page",
+                "example": {
+                  "page": "1"
+                },
+                "type": "number",
+                "required": true,
+                "enable": true
+              },
+              {
+                "key": "size",
+                "example": {
+                  "page": "1"
+                },
+                "type": "number",
+                "required": true,
+                "enable": true
+              }
+            ]
+          },
+          "httpMethod": "POST",
+          "path": "/api/v1/app/1293810924/schema/product",
+          "responseAttributes": [
+            {
+              "key": "id",
+              "enable": true
+            },
+            {
+              "key": "product_name",
+              "enable": true
+            },
+            {
+              "key": "seo_image_link",
+              "enable": true
+            }
+          ]
+        }
+      ],
+      "createdAt": "2009-06-15T13:45:30",
+      "updatedAt": "2009-06-15T13:45:30",
+      "enable": true
+    }
+  ]
+}
