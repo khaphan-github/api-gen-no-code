@@ -1,5 +1,5 @@
-import { GetDataByFilterQueryHandler } from "./get-permission.query";
+import { GetDataQueryHandler } from "./get-one.query";
 
 export const QueryHandlers = [
-  GetDataByFilterQueryHandler,
+  GetDataQueryHandler,
 ];

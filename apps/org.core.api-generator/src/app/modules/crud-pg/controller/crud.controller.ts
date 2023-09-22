@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Options, Param, Post, Put, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { QueryFilterDto } from './query-filter.dto';
+import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateDataCommand } from '../commands/create..command';
+import { GetDataQuery } from '../queries/get-one.query';
+import { ConditionObject } from '../../../domain/db.query.domain';
 
 @ApiTags('CRUD operator')
 @Controller('app/:appid/schema/:schema')
@@ -10,38 +12,54 @@ export class CrudController {
 
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly query: QueryBus,
+    private readonly queryBus: QueryBus,
   ) { }
   // Get list
-  @Get()
-  getData(
-    @Param('appid') appId: string,
-    @Param('schema') schema: string,
-    @Query('page') page: number,
-    @Query('size') size: number,
-    @Query() query: QueryFilterDto
-  ) {
+  // @Get()
+  // getData(
+  //   @Param('appid') appId: string,
+  //   @Param('schema') schema: string,
+  //   @Query('page') page: number,
+  //   @Query('size') size: number,
+  //   @Query() query: QueryFilterDto
+  // ) {
 
-    return {
-      method: "get all",
-      appId: appId,
-      schema: schema
-    };
-  }
+  //   return {
+  //     method: "get all",
+  //     appId: appId,
+  //     schema: schema
+  //   };
+  // }
 
-  // getone
-  @Get(':id')
+  @Post('query')
+  @ApiBody({
+    schema: {
+      example: {
+        condition: {
+          "or": [
+            {
+              "and": [
+                { "auth": "isAuth" },
+                { "method": "POST" }
+              ]
+            },
+            {
+              "or": [
+                { "method": "POST" },
+                { "method": "GET" }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  })
   findById(
-    @Param('appid') appId: string,
-    @Param('schema') schema: string,
-    @Param('id') id: string,
+    @Param() requestParamDataDto: RequestParamDataDto,
+    @Query() QueryParamDataDto: QueryParamDataDto,
+    @Body() condition: ConditionObject
   ) {
-    return {
-      method: "get one",
-      appId: appId,
-      schema: schema,
-      id: id
-    };
+    return this.queryBus.execute(new GetDataQuery(requestParamDataDto, QueryParamDataDto, condition));
   }
 
   @Delete(':id')
