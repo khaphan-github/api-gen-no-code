@@ -5,7 +5,6 @@ import { Logger } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { GetSchemaStructureQuery } from '../queries/get-schema-structure.query';
-import { kMaxLength } from 'buffer';
 
 export class UpdateDataCommand {
   constructor(

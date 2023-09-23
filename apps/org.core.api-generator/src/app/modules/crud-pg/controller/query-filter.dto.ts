@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, } from 'class-validator';
 import { SortType } from '../../../domain/relationaldb.query-builder';
-import { Type } from 'class-transformer';
 
 export class RequestParamDataDto {
   @ApiProperty({

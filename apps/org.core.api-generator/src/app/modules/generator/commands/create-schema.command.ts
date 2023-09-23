@@ -5,11 +5,7 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { EntityManager } from 'typeorm';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
-
-export class TableAttribute {
-  name: string;
-  dataTypeFormat: string;
-}
+import { RelationalDBQueryBuilder, TableAttribute } from '../../../domain/relationaldb.query-builder';
 
 export class CreateSchemaCommand {
   @ApiProperty({ example: 'products' })
@@ -38,40 +34,33 @@ export class CreateSchemaCommand {
   @IsNotEmpty()
   public readonly attributes: Array<TableAttribute>;
 }
+
 @CommandHandler(CreateSchemaCommand)
 export class CreateSchemaCommandHandler
   implements ICommandHandler<CreateSchemaCommand>
 {
   private readonly dbQueryDomain!: DbQueryDomain;
+  private readonly relationalDBQueryBuilder!: RelationalDBQueryBuilder;
   private readonly logger = new Logger(CreateSchemaCommandHandler.name);
+
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
+    this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();
   }
 
   async execute(command: CreateSchemaCommand) {
     const { schemaName, appId, attributes } = command;
-    try {
-      // TODO: Validate request attribute
-      const attributeQuery = attributes.map((attribute) =>
-        ` ${attribute.name} ${attribute.dataTypeFormat} `).join(", ");
+    const tableName = this.dbQueryDomain.getTableName(appId, schemaName);
 
-      const tableName = this.dbQueryDomain.getTableName(appId, schemaName);
-      const queryString = `
-        CREATE TABLE IF NOT EXISTS ${tableName} (
-          id SERIAL PRIMARY KEY,
-          ${attributeQuery}
-        );
-      `;
-      await this.entityManager.query(queryString);
-      return {
-        statusCode: 100,
-        message: 'Execute create table query sucessful!',
-        data: {
-          schema: tableName,
-        }
-      }
+    this.relationalDBQueryBuilder.setTableName(tableName);
+    try {
+
+      const { queryString, } = this.relationalDBQueryBuilder.createTable(attributes);
+      const queryResult = await this.entityManager.query(queryString);
+
+      return queryResult;
     } catch (error) {
       this.logger.error(error);
 

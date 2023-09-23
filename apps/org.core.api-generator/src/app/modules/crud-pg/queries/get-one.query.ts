@@ -4,7 +4,6 @@ import { Logger } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { QueryParamDataDto, RequestParamDataDto } from '../controller/query-filter.dto';
-import _ from 'lodash';
 import { ConditionObject, RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { GetSchemaStructureQuery } from './get-schema-structure.query';
 

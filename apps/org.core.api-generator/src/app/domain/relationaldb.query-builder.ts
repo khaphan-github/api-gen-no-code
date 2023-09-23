@@ -14,6 +14,11 @@ export type SelectQueryType = {
   conditions?: ConditionObject;
 }
 
+export class TableAttribute {
+  name: string;
+  dataTypeFormat: string;
+}
+
 export type QueryBuilderResult = {
   queryString: string;
   params: Array<unknown>;
@@ -144,12 +149,12 @@ export class RelationalDBQueryBuilder {
 
 
       const queryString = `
-      ${defaultQuery}
-      ${whereQuery}
-      ${orderByQuery}
-      ${sizeQuery}
-      ${pageQuery};
-    `;
+        ${defaultQuery}
+        ${whereQuery}
+        ${orderByQuery}
+        ${sizeQuery}
+        ${pageQuery};
+      `;
 
       return {
         queryString: queryString,
@@ -162,6 +167,31 @@ export class RelationalDBQueryBuilder {
       }
     }
   }
+
+  createTable = (attribute: Array<TableAttribute>): QueryBuilderResult => {
+    const attributeQuery = attribute.map((attribute) =>
+      ` ${attribute.name} ${attribute.dataTypeFormat} `).join(", ");
+
+    const queryString = `
+      CREATE TABLE IF NOT EXISTS ${this.table} (
+        id SERIAL PRIMARY KEY,
+        ${attributeQuery}
+      );
+    `;
+    return {
+      queryString: queryString,
+      params: [],
+    }
+  }
+
+  dropTable = (): QueryBuilderResult => {
+    const queryString = `DROP TABLE ${this.table};`;
+    return {
+      queryString: queryString,
+      params: [],
+    }
+  }
+
 
   validateColumns = (columns: string[]) => {
     const invalidColumns = columns?.filter(col => !this.columns.includes(col));
