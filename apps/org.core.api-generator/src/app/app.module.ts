@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppEnvironmentConfig } from './infrastructure/env/app.env.config';
 import { TypeOrmPostgresConfig } from './infrastructure/postgres.db.config';
+import { JsonIoService } from './modules/shared/json.io.service';
 
 const FEATUREMODULES = [
   CrudModule,
@@ -28,6 +29,8 @@ const FEATUREMODULES = [
     }),
 
   ],
-  providers: []
+  providers: [
+    JsonIoService,
+  ]
 })
 export class AppModule { }

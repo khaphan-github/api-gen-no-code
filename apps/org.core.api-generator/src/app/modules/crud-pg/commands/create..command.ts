@@ -5,6 +5,7 @@ import { EntityManager } from 'typeorm';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { GetSchemaStructureQuery } from '../queries/get-schema-structure.query';
+import { PostgresConnectorService } from '../../../infrastructure/connector/pg-connector.service';
 
 export class CreateDataCommand {
   constructor(
@@ -24,6 +25,7 @@ export class CreateDataCommandHandler
 
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
+    private readonly pgConnector: PostgresConnectorService,
     private readonly queryBus: QueryBus,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
@@ -32,6 +34,7 @@ export class CreateDataCommandHandler
   async execute(command: CreateDataCommand) {
     const { appId, schema, data } = command;
     const tableName = this.dbQueryDomain.getTableName(appId, schema);
+    // TODO: Get datbase connection info fron app id;
 
     const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appId, schema));
     const validColumns = this.dbQueryDomain.getTableColumnNameArray(tableInfo, 'column_name');

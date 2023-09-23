@@ -6,14 +6,30 @@ import * as path from 'path';
 export class JsonIoService {
   private readonly assetsPath = path.join(__dirname, 'assets');
 
-  readJsonFile(fileName: string): object {
-    const filePath = path.join(this.assetsPath, fileName);
-    const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+  private getFilePath(fileName: string): string {
+    return path.join(this.assetsPath, fileName);
   }
 
-  writeJsonFile(fileName: string, data: object): void {
-    const filePath = path.join(this.assetsPath, fileName);
+  fileExists(fileName: string): boolean {
+    try {
+      const filePath = this.getFilePath(fileName);
+      return fs.existsSync(filePath);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  readJsonFile<T>(fileName: string): T | null {
+    const filePath = this.getFilePath(fileName);
+    if (this.fileExists(fileName)) {
+      const data = fs.readFileSync(filePath, 'utf8');
+      return JSON.parse(data) as T;
+    }
+    return null; // File doesn't exist
+  }
+
+  writeJsonFile<T>(fileName: string, data: T): void {
+    const filePath = this.getFilePath(fileName);
     const jsonData = JSON.stringify(data, null, 2);
     fs.writeFileSync(filePath, jsonData, 'utf8');
   }
