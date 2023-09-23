@@ -1,8 +1,10 @@
 import { Logger } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
+import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { GetSchemaStructureQuery } from '../queries/get-schema-structure.query';
 
 export class CreateDataCommand {
   constructor(
@@ -16,36 +18,33 @@ export class CreateDataCommandHandler
   implements ICommandHandler<CreateDataCommand>
 {
   private readonly dbQueryDomain!: DbQueryDomain;
+  private readonly relationalDBQueryBuilder!: RelationalDBQueryBuilder;
 
   private readonly logger = new Logger(CreateDataCommandHandler.name);
 
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
+    private readonly queryBus: QueryBus,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
+    this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();
   }
   async execute(command: CreateDataCommand) {
     const { appId, schema, data } = command;
-
-    const columns = Object.keys(data);
-    const values = Object.values(data);
-
-    const placeholders = columns.map((_, index) => `$${index + 1}`).join(', ');
     const tableName = this.dbQueryDomain.getTableName(appId, schema);
 
-    const queryString = `
-     INSERT INTO ${tableName} (${columns.join(', ')}) 
-     VALUES (${placeholders})
-     RETURNING *;
-    `;
-    try {
-      const queryResult = await this.entityManager.query(queryString, values);
+    const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appId, schema));
+    const validColumns = this.dbQueryDomain.getTableColumnNameArray(tableInfo, 'column_name');
 
-      return {
-        statusCode: 100,
-        message: `Execute inser data to ${schema} table query sucessful!`,
-        data: queryResult
-      }
+    this.relationalDBQueryBuilder.setTableName(tableName);
+    this.relationalDBQueryBuilder.setColumns(validColumns);
+
+    try {
+
+      const { queryString, params } = this.relationalDBQueryBuilder.insert(data);
+      const queryResult = await this.entityManager.query(queryString, params);
+
+      return queryResult;
     } catch (error) {
       this.logger.error(error);
 

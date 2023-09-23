@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, } from 'class-validator';
+import { SortType } from '../../../domain/relationaldb.query-builder';
+import { Type } from 'class-transformer';
 
 export class RequestParamDataDto {
   @ApiProperty({
@@ -25,44 +27,47 @@ export class QueryParamDataDto {
     description: `
       Array of attribute you want select, 
       example your product table have 2 attribute: name, id. 
-      you an input [name] or [id] to get return value
+      you an input [name] or [id] to get return value,
+      Default select all;
     `,
-    default: [
-      'id'
-    ],
   })
-  @IsNotEmpty()
   @IsOptional()
-  selects: Array<string> = ['id', 'name', 'method'];
+  @IsArray()
+  selects: Array<string>;
 
   @ApiProperty({
     description: 'Case data have alots you need pagination',
     default: '1',
   })
-  @IsNotEmpty()
+  @IsOptional()
   page: number;
 
   @ApiProperty({
     description: 'Limit number of record you want to get',
     default: '10',
   })
-  @IsNotEmpty()
+  @IsOptional()
   size: number;
 
   @ApiProperty({
     description: 'Other by attribute you check to sort.',
     default: 'id',
   })
-  @IsNotEmpty()
   @IsOptional()
   orderby: string;
 
   @ApiProperty({
     description: 'Sort attribute follow [desc] to descending and [asc] to ascending by default',
-    default: 'asc',
+    default: 'ASC',
   })
-  @IsNotEmpty()
-  @IsIn(['asc', 'desc'])
+  @IsIn(['ASC', 'DESC'])
   @IsOptional()
-  sort: string;
+  sort: SortType;
+
+  @ApiProperty({
+    description: 'Enable cahing data is true, default is false',
+    default: false,
+  })
+  @IsOptional()
+  cahing: boolean;
 }

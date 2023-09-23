@@ -26,8 +26,8 @@ const FEATUREMODULES = [
       inject: [ConfigService],
       useFactory: TypeOrmPostgresConfig,
     }),
+
   ],
-  providers: [
-]
+  providers: []
 })
 export class AppModule { }

@@ -1,12 +1,13 @@
-import { Body, Controller, Delete, Get, Options, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateDataCommand } from '../commands/create..command';
 import { GetDataQuery } from '../queries/get-one.query';
-import { ConditionObject } from '../../../domain/db.query.domain';
 import { DeleteDataCommand } from '../commands/delete.command';
 import { GetSchemaStructureQuery } from '../queries/get-schema-structure.query';
+import { ConditionObject } from '../../../domain/relationaldb.query-builder';
+import { UpdateDataCommand } from '../commands/update.command';
 
 @ApiTags('CRUD operator')
 @Controller('app/:appid/schema/:schema')
@@ -16,22 +17,6 @@ export class CrudController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) { }
-  // Get list
-  // @Get()
-  // getData(
-  //   @Param('appid') appId: string,
-  //   @Param('schema') schema: string,
-  //   @Query('page') page: number,
-  //   @Query('size') size: number,
-  //   @Query() query: QueryFilterDto
-  // ) {
-
-  //   return {
-  //     method: "get all",
-  //     appId: appId,
-  //     schema: schema
-  //   };
-  // }
 
   @Post('query')
   @ApiBody({
@@ -56,7 +41,7 @@ export class CrudController {
       }
     }
   })
-  findById(
+  query(
     @Param() requestParamDataDto: RequestParamDataDto,
     @Query() QueryParamDataDto: QueryParamDataDto,
     @Body() condition: ConditionObject
@@ -90,7 +75,6 @@ export class CrudController {
     return this.commandBus.execute(new CreateDataCommand(appId, schema, data));
   }
 
-
   @Put(':id')
   update(
     @Param('appid') appId: string,
@@ -98,13 +82,7 @@ export class CrudController {
     @Param('id') id: string,
     @Body() data: object
   ) {
-    return {
-      method: "update",
-      appId: appId,
-      schema: schema,
-      id: id,
-      data: data
-    };
+    return this.commandBus.execute(new UpdateDataCommand(appId, schema, id, data));
   }
 
   @Get('structure')
