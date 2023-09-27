@@ -6,6 +6,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { JsonIoService } from '../shared/json.io.service';
 import { PostgresConnectorService } from '../../infrastructure/connector/pg-connector.service';
 import NodeCache from 'node-cache';
+import { GeneratorService } from './services/generator.service';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import NodeCache from 'node-cache';
         JsonIoService,
         NodeCache,
         PostgresConnectorService,
+        GeneratorService,
     ],
 })
 export class GeneratorModule { }

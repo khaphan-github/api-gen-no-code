@@ -1,21 +1,15 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { CreateDataCommand } from '../commands/create..command';
-import { GetDataQuery } from '../queries/get-one.query';
-import { DeleteDataCommand } from '../commands/delete.command';
-import { GetSchemaStructureQuery } from '../queries/get-schema-structure.query';
 import { ConditionObject } from '../../../domain/relationaldb.query-builder';
-import { UpdateDataCommand } from '../commands/update.command';
+import { CrudService } from '../services/crud-pg.service';
 
 @ApiTags('CRUD operator')
 @Controller('app/:appid/schema/:schema')
 export class CrudController {
 
   constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
+    private readonly service: CrudService,
   ) { }
 
   @Post('query')
@@ -43,10 +37,10 @@ export class CrudController {
   })
   query(
     @Param() requestParamDataDto: RequestParamDataDto,
-    @Query() QueryParamDataDto: QueryParamDataDto,
-    @Body() condition: ConditionObject
+    @Query() queryParamDataDto: QueryParamDataDto,
+    @Body() conditions: ConditionObject
   ) {
-    return this.queryBus.execute(new GetDataQuery(requestParamDataDto, QueryParamDataDto, condition));
+    return this.service.query(requestParamDataDto, queryParamDataDto, conditions);
   }
 
   @Delete(':id')
@@ -55,7 +49,7 @@ export class CrudController {
     @Param('schema') schema: string,
     @Param('id') id: number
   ) {
-    return this.commandBus.execute(new DeleteDataCommand(appId, schema, id));
+    return this.service.delete(appId, schema, id);
   }
 
   @Post()
@@ -67,12 +61,12 @@ export class CrudController {
       }
     }
   })
-  create(
+  insert(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
     @Body() data: object
   ) {
-    return this.commandBus.execute(new CreateDataCommand(appId, schema, data));
+    return this.service.insert(appId, schema, data);
   }
 
   @Put(':id')
@@ -82,7 +76,7 @@ export class CrudController {
     @Param('id') id: string,
     @Body() data: object
   ) {
-    return this.commandBus.execute(new UpdateDataCommand(appId, schema, id, data));
+    return this.service.update(appId, schema, id, data);
   }
 
   @Get('structure')
@@ -90,6 +84,6 @@ export class CrudController {
     @Param('appid') appId: string,
     @Param('schema') schema: string
   ) {
-    return this.queryBus.execute(new GetSchemaStructureQuery(appId, schema));
+    return this.service.getSchemaStructure(appId, schema);
   }
 }

@@ -5,13 +5,13 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { QueryParamDataDto, RequestParamDataDto } from '../controller/query-filter.dto';
 import { ConditionObject, RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { GetSchemaStructureQuery } from './get-schema-structure.query';
 
 export class GetDataQuery {
   constructor(
     public readonly requestParamDataDto: RequestParamDataDto,
     public readonly queryParamDataDto: QueryParamDataDto,
-    public readonly conditions: ConditionObject
+    public readonly conditions: ConditionObject,
+    public readonly tableInfo: object[],
   ) { }
 }
 @QueryHandler(GetDataQuery)
@@ -33,19 +33,18 @@ export class GetDataQueryHandler
   }
 
   async execute(query: GetDataQuery): Promise<object> {
-    const { requestParamDataDto, queryParamDataDto, conditions } = query;
+    const { requestParamDataDto, queryParamDataDto, conditions, tableInfo } = query;
 
     const { appid, schema } = requestParamDataDto;
     const { orderby, page, selects, size, sort } = queryParamDataDto;
 
-    const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appid, schema));
     const validColumns = this.dbQueryDomain.getTableColumnNameArray(tableInfo, 'column_name');
 
     const tableName = this.dbQueryDomain.getTableName(appid, schema);
 
     this.relationalDBQueryBuilder.setColumns(validColumns);
     this.relationalDBQueryBuilder.setTableName(tableName);
-    
+
     try {
       const { params, queryString } = this.relationalDBQueryBuilder.getByQuery(
         {

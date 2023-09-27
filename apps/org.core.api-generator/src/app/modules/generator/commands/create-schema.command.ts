@@ -57,15 +57,15 @@ export class CreateSchemaCommandHandler
     const { schemaName, appId, attributes } = command;
     const tableName = this.dbQueryDomain.getTableName(appId, schemaName);
 
-    // Get APP config;
+    // #region get app config;
     const appConfigFileName = this.dbQueryDomain.getAppConfigJsonFileName(appId);
     const appConfigCacheKey = this.dbQueryDomain.getCahingAppConfig(appId);
     let appConfig = this.nodeCache.get<AppConfigDomain>(appConfigCacheKey);
-
     if (!appConfig) {
       appConfig = this.jsonIoService.readJsonFile<AppConfigDomain>(appConfigFileName);
       this.nodeCache.set(appConfigCacheKey, appConfig);
     }
+    // #endregion get app config;
 
     // Execute using appConfig
     this.relationalDBQueryBuilder.setTableName(tableName);

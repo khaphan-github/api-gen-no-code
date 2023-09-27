@@ -192,6 +192,18 @@ export class RelationalDBQueryBuilder {
     }
   }
 
+  // app_id_44%
+  getSchemaInfo = (tableName: string): QueryBuilderResult => {
+    const queryString = `
+      SELECT *
+      FROM information_schema.columns 
+      WHERE table_name LIKE $1
+    `;
+    return {
+      queryString: queryString,
+      params: [tableName],
+    }
+  }
 
   validateColumns = (columns: string[]) => {
     const invalidColumns = columns?.filter(col => !this.columns.includes(col));

@@ -37,6 +37,7 @@ export class DbQueryDomain {
     return `user.config.db/app_${appId}.config.json`;
   }
 
+
   getPGDbConfig = (appConfig: AppConfigDomain): ClientConfig => {
     const pgConfig: ClientConfig = {
       host: appConfig.host,

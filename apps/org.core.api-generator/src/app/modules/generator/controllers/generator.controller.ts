@@ -1,31 +1,22 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiTags } from '@nestjs/swagger';
-import { GetConfigQuery } from '../queries/getconfig.query';
-import { CreateSchemaCommand } from '../commands/create-schema.command';
-import { DropSchemaCommand } from '../commands/drop-schema.command';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { CreateAppDto } from '../dto/create-app.dto';
-import { CreateAppCommand } from '../commands/create-app.command';
+import { GeneratorService } from '../services/generator.service';
 
 @ApiTags('Api Generator')
 @Controller('generator')
 export class GeneratorController {
   constructor(
-    private readonly queryBus: QueryBus,
-    private readonly commandBus: CommandBus,
+    private readonly service: GeneratorService,
   ) { }
 
   @Get('config')
+  @ApiOperation({
+    description: `Api lấy thông tin của ứng dụng gennerate code, chứa các config mạc định của hệ thống`
+  })
   getConfig() {
-    return this.queryBus.execute(new GetConfigQuery());
-  }
-
-  @Post()
-  createDb(
-    @Body() createSchemaCommand: CreateSchemaCommand
-  ) {
-    return this.commandBus.execute(createSchemaCommand);
+    return this.service.getAppConfig();
   }
 
   @Delete('app/:appid/schema/:schema')
@@ -33,8 +24,9 @@ export class GeneratorController {
     @Param('appid') appId: string,
     @Param('schema') schema: string,
   ) {
-    return this.commandBus.execute(new DropSchemaCommand(appId, schema));
+    return this.service.dropSchema(appId, schema);
   }
+
   @Put('app/:appid/config')
   async updateConfig(
     @Param('appid') appId: string,
@@ -51,6 +43,6 @@ export class GeneratorController {
 
   @Post('app')
   createApp(@Body() createAppDto: CreateAppDto) {
-    return this.commandBus.execute(new CreateAppCommand(createAppDto));
+    return this.service.createApp(createAppDto);
   }
 }
