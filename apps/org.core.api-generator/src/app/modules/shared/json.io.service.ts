@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
 export class JsonIoService {
   private readonly assetsPath = path.join(__dirname, 'assets');
+  private readonly logger = new Logger(JsonIoService.name);
 
   private getFilePath(fileName: string): string {
     return path.join(this.assetsPath, fileName);
@@ -15,6 +16,7 @@ export class JsonIoService {
       const filePath = this.getFilePath(fileName);
       return fs.existsSync(filePath);
     } catch (error) {
+      this.logger.error(error);
       return false;
     }
   }

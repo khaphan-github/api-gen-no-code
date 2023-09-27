@@ -3,6 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { CreateAppDto } from '../dto/create-app.dto';
 import { GeneratorService } from '../services/generator.service';
+import { AppAlreadyExistError } from '../errors/create-app.command.error';
 
 @ApiTags('Api Generator')
 @Controller('generator')
@@ -37,12 +38,21 @@ export class GeneratorController {
 
 
   @Post('app/:appid/script')
-  executeCreateDbScript(@Body() script: ExecuteScriptDto) {
-    throw new Error('Create database using script')
+  executeCreateDbScript(
+    @Param('appid') appId: string,
+    @Body() scripts: ExecuteScriptDto
+  ) {
+    return this.service.executeCreateDatabaseScript(appId, scripts);
   }
 
   @Post('app')
-  createApp(@Body() createAppDto: CreateAppDto) {
-    return this.service.createApp(createAppDto);
+  async createApp(@Body() createAppDto: CreateAppDto) {
+    return {
+      statusCode: 200,
+      message: 'Create app success',
+      data: await this.service.createApp(createAppDto)
+    }
   }
+  // TODO: API get list of API generated.
+
 }

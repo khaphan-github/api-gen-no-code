@@ -1,14 +1,6 @@
 import { ClientConfig } from "pg";
+import { AppConfigDomain } from "./app.core.domain";
 
-export type AppConfigDomain = {
-  appName: string;
-  database: string;
-  databaseName: string;
-  host: string;
-  password: string;
-  port: 5432,
-  username: string;
-}
 
 export enum AvailableDB {
   PG = 'postgres',

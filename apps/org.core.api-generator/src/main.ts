@@ -14,6 +14,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, CONFIG_SWAGGER);
   SwaggerModule.setup('swagger', app, document);
+
+  app.enableCors(); // only develop env'
   
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
@@ -21,7 +23,7 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
+  Logger.log(`🚀 Application is running on: http://localhost:${port}${globalPrefix}`);
 }
 
 bootstrap();
