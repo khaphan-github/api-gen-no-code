@@ -3,7 +3,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { CreateAppDto } from '../dto/create-app.dto';
 import { GeneratorService } from '../services/generator.service';
-import { AppAlreadyExistError } from '../errors/create-app.command.error';
 
 @ApiTags('Api Generator')
 @Controller('generator')
@@ -12,13 +11,18 @@ export class GeneratorController {
     private readonly service: GeneratorService,
   ) { }
 
-  @Get('config')
+  @Get('apps')
   @ApiOperation({
-    description: `Api lấy thông tin của ứng dụng gennerate code, chứa các config mạc định của hệ thống`
+    description: `Lấy danh sach apps`
   })
-  getConfig() {
-    return this.service.getAppConfig();
+  async getConfig() {
+    return {
+      statusCode: 200,
+      message: 'Create app success',
+      data: await this.service.getApps()
+    }
   }
+
 
   @Delete('app/:appid/schema/:schema')
   dropTable(
@@ -47,10 +51,20 @@ export class GeneratorController {
 
   @Post('app')
   async createApp(@Body() createAppDto: CreateAppDto) {
+    const appCreated = await this.service.createApp(createAppDto);
+    if (appCreated !== true) {
+      if (appCreated.errno === -111)
+      return {
+        statusCode: -111,
+        message: 'Không thể kế nối đến databsse',
+        data: appCreated
+      }
+    }
+
     return {
       statusCode: 200,
       message: 'Create app success',
-      data: await this.service.createApp(createAppDto)
+      data: appCreated
     }
   }
   // TODO: API get list of API generated.

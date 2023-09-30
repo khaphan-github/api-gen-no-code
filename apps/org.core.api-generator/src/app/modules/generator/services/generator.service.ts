@@ -14,7 +14,7 @@ export class GeneratorService {
     private readonly queryBus: QueryBus,
   ) { }
 
-  getAppConfig() {
+  getApps() {
     return this.queryBus.execute(new GetAppConfigQuery());
   }
 
@@ -29,4 +29,5 @@ export class GeneratorService {
   executeCreateDatabaseScript = (appId: string | number, scripts: ExecuteScriptDto) => {
     return this.commandBus.execute(new ExecuteScriptCommand(appId, scripts));
   }
+
 } 

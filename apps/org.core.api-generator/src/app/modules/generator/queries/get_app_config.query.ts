@@ -18,5 +18,17 @@ export class GetAppConfigQueryHandler
 
   }
   async execute() {
+    // TODO:  Get list of apps // get by user id, optional;
+    // owner.
+    return [{
+      id: 314124,
+      appName: 'App1',
+      database: 'pg',
+    },
+    {
+      id: 354124,
+      appName: 'app2',
+      database: 'mysql',
+    }]
   }
 }

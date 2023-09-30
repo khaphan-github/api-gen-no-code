@@ -3,13 +3,6 @@ import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class CreateAppDto {
   @ApiProperty({
-    description: `Create new application with name and info`,
-    default: 'Ứng dụng quản lý sản phẩm'
-  })
-  @IsNotEmpty()
-  appName: string;
-
-  @ApiProperty({
     description: `Choose database type to create connections`,
     default: 'postgres'
   })
@@ -52,11 +45,4 @@ export class CreateAppDto {
   })
   @IsNotEmpty()
   databaseName: string;
-
-  @ApiProperty({
-    description: `Host of database`,
-    default: true,
-  })
-  @IsNotEmpty()
-  createIfNotExist: boolean;
 }
