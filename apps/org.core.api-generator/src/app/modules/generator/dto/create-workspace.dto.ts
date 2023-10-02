@@ -1,68 +1,48 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
-export class CreateApplicationDto {
+export class CreateWorkspaceDto {
   @ApiProperty({
     description: `Choose database type to create connections`,
     default: 'postgres'
   })
   @IsNotEmpty()
-  workspaceId: number;
-
-  @ApiProperty({
-    description: `Choose database type to create connections`,
-    default: 'postgres'
-  })
-  @IsNotEmpty()
-  appName: string;
-
-  @ApiProperty({
-    description: `Choose database type to create connections`,
-    default: true
-  })
-  @IsNotEmpty()
-  useDefaultDb: boolean;
-
-  @ApiProperty({
-    description: `Choose database type to create connections`,
-    default: 'postgres'
-  })
-  @IsNotEmpty()
-  database: string;
+  database: any;
 
   // Databsase config.
   @ApiProperty({
     description: `Host of database`,
     default: 'localhost'
   })
-  @IsOptional()
+  @IsNotEmpty()
   host: string;
 
   @ApiProperty({
     description: `Host of database`,
     default: 5432
   })
-  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
   port: number;
 
   @ApiProperty({
     description: `Host of database`,
     default: 'admin'
   })
-  @IsOptional()
+  @IsNotEmpty()
   username: string;
 
   @ApiProperty({
     description: `Host of database`,
     default: 'admin'
   })
-  @IsOptional()
+  @IsNotEmpty()
   password: string;
 
   @ApiProperty({
     description: `Host of database`,
     default: 'product'
   })
-  @IsOptional()
+  @IsNotEmpty()
   databaseName: string;
 }

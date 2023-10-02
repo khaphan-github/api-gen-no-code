@@ -4,7 +4,6 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { PostgresConnectorService } from '../../../infrastructure/connector/pg-connector.service';
 
 export class CreateDataCommand {
   constructor(
@@ -25,7 +24,6 @@ export class CreateDataCommandHandler
 
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
-    private readonly pgConnector: PostgresConnectorService,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
     this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();

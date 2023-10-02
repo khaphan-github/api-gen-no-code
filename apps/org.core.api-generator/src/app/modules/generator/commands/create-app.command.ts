@@ -1,88 +1,102 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateAppDto } from '../dto/create-app.dto';
-import { JsonIoService } from '../../shared/json.io.service';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { Logger } from '@nestjs/common';
-import { DataSource } from "typeorm";
+import { DataSource, DataSourceOptions } from "typeorm";
 import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { JsonIoService } from '../../shared/json.io.service';
+import { CreateApplicationDto } from '../dto/create-app.dto';
+import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
 
-export class AppAlreadyExistError extends Error {
+export class CreateApplicationCommand {
   constructor(
-    appName: string,
-    public readonly statusCode?: number,
-    public readonly metadata?: object,
-  ) {
-    super();
-    this.message = `Application ${appName} already exist`;
-    this.name = AppAlreadyExistError.name;
-  }
+    public readonly ownerId: string,
+    public readonly CreateApplicationDto: CreateApplicationDto,
+  ) { }
 }
 
-export class CreateAppCommand {
-  constructor(public readonly createAppDto: CreateAppDto) { }
-}
-
-@CommandHandler(CreateAppCommand)
-export class CreateAppCommandHandler
-  implements ICommandHandler<CreateAppCommand>
+@CommandHandler(CreateApplicationCommand)
+export class CreateApplicationCommandHandler
+  implements ICommandHandler<CreateApplicationCommand>
 {
-  private readonly dbQueryDomain!: DbQueryDomain;
   private readonly appCoreDomain!: AppCoreDomain;
+  private readonly queryBuilder!: RelationalDBQueryBuilder;
 
-  private readonly logger = new Logger(CreateAppCommandHandler.name);
+  private readonly logger = new Logger(CreateApplicationCommandHandler.name);
 
   constructor(
-    private readonly jsonIoService: JsonIoService
+    private readonly jsonIO: JsonIoService,
   ) {
-    this.dbQueryDomain = new DbQueryDomain();
     this.appCoreDomain = new AppCoreDomain();
+    this.queryBuilder = new RelationalDBQueryBuilder();
+
   }
 
-  /**LOGIC:
-   * Kiểm tra kết nối cơ sở dữ liệu, thực hiện kết nối đến cơ sở dữ liệu tương ứng
-   * Sau đó tạo các bảng cần thiết:
-   * 1. Bảng API - Lưu các API sẽ tạo
-   * 2. Bảng Config - Lưu các config của user,
-   * 3. Bảng App, Lưu thông tin các ứng dụng con khi user tạo,
-   * DOCS: https://orkhan.gitbook.io/typeorm/docs/data-source
-   */
-  async execute(command: CreateAppCommand) {
-    const { databaseName, host, password, port, username } = command.createAppDto;
+  async execute(command: CreateApplicationCommand) {
+    const { appName, useDefaultDb, workspaceId, database, databaseName, host, password, port, username }
+      = command.CreateApplicationDto;
 
     try {
-      const typeormDataSource = await new DataSource({
-        type: 'postgres',
-        host: host,
-        port: port,
-        username: username,
-        password: password,
-        database: databaseName,
-      }).initialize();
+      // Get config workspace datbase
+      const workspaceDbConfig = this.jsonIO.readJsonFile<DataSourceOptions>(
+        this.appCoreDomain.getDefaultWorkspaceId().toString()
+      );
+      if (workspaceDbConfig) {
+        this.queryBuilder.setColumns(['id','owner_id', 'app_name', 'enable', 'use_default_db', 'database_config', 'workspace_id']);
+        this.queryBuilder.setTableName(APPLICATIONS_TABLE_NAME);
+        let query = '';
+        let queryParams = [];
 
-      const queryInitCoreTable = `
-        ${this.appCoreDomain.createAPITableSQLScriptPG()}
-        ${this.appCoreDomain.createAppTableSQLScriptPG()}
-        ${this.appCoreDomain.createHostSQLScriptPG()}
-      `
-      await typeormDataSource.query(queryInitCoreTable);
+        if (useDefaultDb) {
+          const { queryString, params } = this.queryBuilder.insert({
+            owner_id: command.ownerId,
+            app_name: appName,
+            workspace_id: workspaceId,
+            enable: true,
+            use_default_db: true,
+            database_config: workspaceDbConfig,
+          }, ['id']);
 
-      // TODO: Execute script insert config to table config;
-      const insertConfig = this.appCoreDomain.insertDbConfig({
-        databaseName: databaseName,
-        databaseType: 'postgres',
-        host: host,
-        ownerId: 'test_user_id',
-        password: password,
-        port: port,
-        username: username,
-      });
+          query = queryString;
+          queryParams = params;
+        } else {
 
-      await typeormDataSource.query(insertConfig.query, insertConfig.params);
+          const databaseConfig = {
+            type: database,
+            host: host,
+            port: port,
+            username: username,
+            password: password,
+            database: databaseName,
+          };
 
-      return true;
+          const { queryString, params } = this.queryBuilder.insert({
+            owner_id: command.ownerId,
+            app_name: appName,
+            workspace_id: workspaceId,
+            enable: true,
+            use_default_db: false,
+            database_config: databaseConfig,
+          }, ['id']);
+
+          query = queryString;
+          queryParams = params;
+        }
+        const typeormDataSource = await new DataSource(workspaceDbConfig).initialize();
+
+        const queryResult = await typeormDataSource.query(query, queryParams);
+
+        return queryResult;
+      } else {
+        throw new Error(`Json file workspace config not found`);
+      }
     } catch (error) {
       this.logger.error(error);
-      return error;
+
+      return {
+        statusCode: 101,
+        message: error.message
+      }
     }
   }
 }

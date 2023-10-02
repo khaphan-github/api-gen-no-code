@@ -5,7 +5,6 @@ import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { AvailableDB, DbQueryDomain } from '../../../domain/db.query.domain';
 import { RelationalDBQueryBuilder, TableAttribute } from '../../../domain/relationaldb.query-builder';
 import { JsonIoService } from '../../shared/json.io.service';
-import { PostgresConnectorService } from '../../../infrastructure/connector/pg-connector.service';
 import NodeCache from 'node-cache';
 import { AppConfigDomain } from '../../../domain/app.core.domain';
 
@@ -46,7 +45,6 @@ export class CreateSchemaCommandHandler
   private readonly logger = new Logger(CreateSchemaCommandHandler.name);
 
   constructor(
-    private readonly pgConnector: PostgresConnectorService,
     private readonly jsonIoService: JsonIoService,
     private readonly nodeCache: NodeCache,
   ) {
@@ -77,8 +75,8 @@ export class CreateSchemaCommandHandler
 
       switch (appConfig.database) {
         case AvailableDB.PG:
-          this.pgConnector.setConfig(this.dbQueryDomain.getPGDbConfig(appConfig));
-          queryResult = await this.pgConnector.execute(queryString);
+          // this.pgConnector.setConfig(this.dbQueryDomain.getPGDbConfig(appConfig));
+          // queryResult = await this.pgConnector.execute(queryString);
           break;
 
         case AvailableDB.MYSQL:

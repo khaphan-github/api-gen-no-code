@@ -4,7 +4,6 @@ import { Module } from '@nestjs/common';
 import { QueryHandlers } from './queries';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JsonIoService } from '../shared/json.io.service';
-import { PostgresConnectorService } from '../../infrastructure/connector/pg-connector.service';
 import NodeCache from 'node-cache';
 import { GeneratorService } from './services/generator.service';
 
@@ -18,7 +17,6 @@ import { GeneratorService } from './services/generator.service';
         ...QueryHandlers,
         JsonIoService,
         NodeCache,
-        PostgresConnectorService,
         GeneratorService,
     ],
 })

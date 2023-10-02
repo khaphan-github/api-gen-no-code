@@ -4,7 +4,6 @@ import { QueryHandlers } from './queries';
 import { CommandHandlers } from './commands';
 import { CqrsModule } from '@nestjs/cqrs';
 import NodeCache from 'node-cache';
-import { PostgresConnectorService } from '../../infrastructure/connector/pg-connector.service';
 import { CrudService } from './services/crud-pg.service';
 
 @Module({
@@ -16,7 +15,6 @@ import { CrudService } from './services/crud-pg.service';
         ...QueryHandlers,
         ...CommandHandlers,
         NodeCache,
-        PostgresConnectorService,
         CrudService,
     ],
 })

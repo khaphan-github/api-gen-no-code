@@ -31,7 +31,6 @@ export class QueryParamDataDto {
     `,
   })
   @IsOptional()
-  @IsArray()
   selects: Array<string>;
 
   @ApiProperty({

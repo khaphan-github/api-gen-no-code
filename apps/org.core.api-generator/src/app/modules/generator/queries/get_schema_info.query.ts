@@ -3,7 +3,6 @@ import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { Logger } from '@nestjs/common';
 import { CreateDataCommandHandler } from '../../crud-pg/commands/create..command';
-import { PostgresConnectorService } from '../../../infrastructure/connector/pg-connector.service';
 import { JsonIoService } from '../../shared/json.io.service';
 
 export class GetSchemaInfoQuery {
@@ -22,8 +21,6 @@ export class GetSchemaInfoQueryHandler
   private readonly logger = new Logger(CreateDataCommandHandler.name);
 
   constructor(
-    private readonly pgConnector: PostgresConnectorService,
-    private readonly queryBus: QueryBus,
     private readonly jsonIoService: JsonIoService
   ) {
     this.dbQueryDomain = new DbQueryDomain();
@@ -43,6 +40,7 @@ export class GetSchemaInfoQueryHandler
     
     // #endregion get app config;
     try {
+      // TODO:
     } catch (error) {
       this.logger.error(error);
 

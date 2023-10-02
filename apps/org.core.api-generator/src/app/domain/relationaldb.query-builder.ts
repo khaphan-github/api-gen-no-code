@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _, { isBuffer } from "lodash";
 
 export interface ConditionObject {
   and?: ConditionObject[];
@@ -122,16 +122,19 @@ export class RelationalDBQueryBuilder {
       FROM ${this.table}
     `;
 
-    if (types) {
+    if (!_.isNil(types)) {
       const { orderby, page, size, sort, conditions } = types;
       if (orderby) {
         this.validateColumns([orderby]);
       }
 
       // Prepare where condition
+      let whereQuery = '';
       const conditionParams: string[] = [];
-      const conditionQuery = this.generateConditionQuery(conditions, conditionParams);
-      const whereQuery = !_.isEmpty(conditions) ? ` WHERE ${conditionQuery} ` : '';
+      if (!_.isNil(conditions)) {
+        const conditionQuery = this.generateConditionQuery(conditions, conditionParams);
+        whereQuery = !_.isNil(conditions) ? ` WHERE ${conditionQuery} ` : '';
+      }
 
       // Prepare orderby contidion;
       const sortQuery = sort ? 'ASC' : 'DESC';
@@ -213,6 +216,9 @@ export class RelationalDBQueryBuilder {
   }
 
   generateConditionQuery = (conditionObject: ConditionObject, params: unknown[]): string => {
+    if (_.isNil(conditionObject)) {
+      throw new Error(`conditionObject should not be empty`);
+    }
     if ('and' in conditionObject) {
       const andConditions = conditionObject.and?.map((condition) => this.generateConditionQuery(condition, params));
       return `(${andConditions.join(' AND ')})`;
