@@ -1,6 +1,18 @@
 export const WORKSPACE_TABLE_NAME = `_core_workspace_config`;
 export const GENERATED_APIS_TABLE_NAME = `_core_generated_apis`;
 export const APPLICATIONS_TABLE_NAME = `_core_applications`;
+export const APPLICATIONS_TABLE_AVAILABLE_COLUMS = [
+  "id",
+  "owner_id",
+  "workspace_id",
+  "app_name",
+  "tables_info",
+  "database_config",
+  "use_default_db",
+  "enable",
+  "created_at",
+  'updated_at'
+];
 
 export const CREATE_WORKSPACE_TABLE_SCRIPT = `
   CREATE TABLE IF NOT EXISTS ${WORKSPACE_TABLE_NAME} (

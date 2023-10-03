@@ -56,11 +56,10 @@ export class GeneratorController {
   @HttpCode(200)
   async isExistedWorkspace() {
     const isExistedWorkspace = await this.service.isExistedWorkspace();
-    if (isExistedWorkspace !== true) {
-      if (isExistedWorkspace.errno === -111)
-        return new ResponseBase(-111, 'Không thể kế nối đến databsse', isExistedWorkspace);
-    }
-    return new ResponseBase(200, 'Check is exited workspace success', isExistedWorkspace);
+    return new ResponseBase(200, 'Check is exited workspace success', {
+      isExisted: isExistedWorkspace,
+      woskspaceId: 2023
+    });
   }
 
   @Post('workspace')

@@ -3,12 +3,12 @@ import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-bui
 import { JsonIoService } from '../../shared/json.io.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { AppCoreDomain } from '../../../domain/app.core.domain';
-import { APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
-import { UnDefineError, WorkspaceConfigNotFound } from './get-workspace.query';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
 import { Logger } from '@nestjs/common';
 
 export class GetAppsByWorkspaceIdQuery {
   constructor(
+    public readonly workspaceConnections: DataSourceOptions,
     public readonly ownerId: string,
     public readonly workspaceId: number,
   ) { }
@@ -28,39 +28,28 @@ export class GetAppsByWorkspaceIdQueryHandler
     this.queryBuilder = new RelationalDBQueryBuilder();
   }
   async execute(query: GetAppsByWorkspaceIdQuery) {
-    const { ownerId, workspaceId } = query;
+    const { ownerId, workspaceId, workspaceConnections } = query;
     try {
-      const workspaceDbConfig = this.jsonIO.readJsonFile<DataSourceOptions>(
-        this.appCoreDomain.getDefaultWorkspaceId().toString()
-      );
-      if (workspaceDbConfig) {
-        const typeormDataSource = await new DataSource(workspaceDbConfig).initialize();
+      const typeormDataSource = await new DataSource(workspaceConnections).initialize();
 
-        this.queryBuilder.setColumns(['id', 'owner_id', 'workspace_id', 'app_name', 'database_config', 'enable']);
-        this.queryBuilder.setTableName(APPLICATIONS_TABLE_NAME);
+      this.queryBuilder.setColumns(APPLICATIONS_TABLE_AVAILABLE_COLUMS);
+      this.queryBuilder.setTableName(APPLICATIONS_TABLE_NAME);
 
-        const { queryString, params } = this.queryBuilder.getByQuery({
-          conditions: {
-            and: [
-              { owner_id: ownerId },
-              { workspace_id: workspaceId.toString() },
-            ]
-          }
-        }, ['id', 'workspace_id', 'app_name', 'enable']);
+      const { queryString, params } = this.queryBuilder.getByQuery({
+        conditions: {
+          and: [
+            { owner_id: ownerId },
+            { workspace_id: workspaceId.toString() },
+          ]
+        }
+      }, ['id', 'workspace_id', 'app_name', 'enable', 'use_default_db', 'updated_at']);
 
-        const queryResult = await typeormDataSource.query(queryString, params);
+      const queryResult = await typeormDataSource.query(queryString, params);
+      await typeormDataSource.destroy();
+      return queryResult;
 
-        return queryResult;
-      } else {
-        throw new WorkspaceConfigNotFound();
-      }
     } catch (error) {
-      if (error instanceof WorkspaceConfigNotFound) {
-        throw error;
-      } else {
-        this.logger.error(error);
-        throw new UnDefineError(error.message);
-      }
+      this.logger.error(error);
     }
   }
 }

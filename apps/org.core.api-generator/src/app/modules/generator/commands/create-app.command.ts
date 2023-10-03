@@ -6,7 +6,7 @@ import { AppCoreDomain } from '../../../domain/app.core.domain';
 import { JsonIoService } from '../../shared/json.io.service';
 import { CreateApplicationDto } from '../dto/create-app.dto';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
 
 export class CreateApplicationCommand {
   constructor(
@@ -42,11 +42,11 @@ export class CreateApplicationCommandHandler
         this.appCoreDomain.getDefaultWorkspaceId().toString()
       );
       if (workspaceDbConfig) {
-        this.queryBuilder.setColumns(['id','owner_id', 'app_name', 'enable', 'use_default_db', 'database_config', 'workspace_id']);
+        this.queryBuilder.setColumns(APPLICATIONS_TABLE_AVAILABLE_COLUMS);
         this.queryBuilder.setTableName(APPLICATIONS_TABLE_NAME);
         let query = '';
         let queryParams = [];
-
+        const responseColumns = ['id', 'workspace_id', 'app_name', 'enable', 'use_default_db', 'updated_at'];
         if (useDefaultDb) {
           const { queryString, params } = this.queryBuilder.insert({
             owner_id: command.ownerId,
@@ -55,7 +55,7 @@ export class CreateApplicationCommandHandler
             enable: true,
             use_default_db: true,
             database_config: workspaceDbConfig,
-          }, ['id']);
+          }, responseColumns);
 
           query = queryString;
           queryParams = params;
@@ -77,7 +77,7 @@ export class CreateApplicationCommandHandler
             enable: true,
             use_default_db: false,
             database_config: databaseConfig,
-          }, ['id']);
+          }, responseColumns);
 
           query = queryString;
           queryParams = params;
@@ -86,7 +86,7 @@ export class CreateApplicationCommandHandler
 
         const queryResult = await typeormDataSource.query(query, queryParams);
 
-        return queryResult;
+        return queryResult[0];
       } else {
         throw new Error(`Json file workspace config not found`);
       }

@@ -2,6 +2,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { JsonIoService } from '../../shared/json.io.service';
 
 export class GetAppUserConfigQuery {
+
 }
 @QueryHandler(GetAppUserConfigQuery)
 export class GetAppUserConfigQueryHandler

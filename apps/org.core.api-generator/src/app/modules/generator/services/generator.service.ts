@@ -6,12 +6,12 @@ import { CreateWorkspaceCommand } from "../commands/create-workspace.command";
 import { DropSchemaCommand } from "../commands/drop-schema.command";
 import { ExecuteScriptDto } from "../dto/script.dto";
 import { ExecuteScriptCommand } from "../commands/execute-script.command";
-import { IsExistedWorkspaceQuery } from "../queries/is-exited-workspace.query";
 import { QueryParamDataDto } from "../../crud-pg/controller/query-filter.dto";
 import { GetWorkspaceByIdQuery } from "../queries/get-workspace.query";
 import { CreateApplicationDto } from "../dto/create-app.dto";
 import { CreateApplicationCommand } from "../commands/create-app.command";
 import { GetAppsByWorkspaceIdQuery } from "../queries/get-app-by-workspace-id.query";
+import { GetWorkspaceConnectionQuery } from "../queries/get-workspace-connection.query";
 
 @Injectable()
 export class GeneratorService {
@@ -36,19 +36,30 @@ export class GeneratorService {
     return this.commandBus.execute(new ExecuteScriptCommand(appId, scripts));
   }
 
-  isExistedWorkspace() {
-    return this.queryBus.execute(new IsExistedWorkspaceQuery());
+  async isExistedWorkspace() {
+    try {
+      await this.getWorkspaceConnection();
+    } catch (error) {
+      return false;
+    }
+    return true;
   }
 
-  getWorkspaceById(id: string, queryParamDto: QueryParamDataDto) {
-    return this.queryBus.execute(new GetWorkspaceByIdQuery(id, queryParamDto));
+  async getWorkspaceById(id: string, queryParamDto: QueryParamDataDto) {
+    const workspaceConnection = await this.getWorkspaceConnection();
+    return this.queryBus.execute(new GetWorkspaceByIdQuery(workspaceConnection, id, queryParamDto));
   }
 
   createApp(ownerId: string, createAppDto: CreateApplicationDto) {
     return this.commandBus.execute(new CreateApplicationCommand(ownerId, createAppDto));
   }
 
-  getAppsByWorkspaceId(ownerId: string, workspaceId: number,) {
-    return this.queryBus.execute(new GetAppsByWorkspaceIdQuery(ownerId, workspaceId));
+  async getAppsByWorkspaceId(ownerId: string, workspaceId: number,) {
+    const workspaceConnection = await this.getWorkspaceConnection();
+    return this.queryBus.execute(new GetAppsByWorkspaceIdQuery(workspaceConnection, ownerId, workspaceId));
+  }
+
+  private getWorkspaceConnection() {
+    return this.queryBus.execute(new GetWorkspaceConnectionQuery(2023));
   }
 } 
