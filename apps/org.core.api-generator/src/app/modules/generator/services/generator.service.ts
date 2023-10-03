@@ -32,8 +32,9 @@ export class GeneratorService {
     return this.commandBus.execute(new DropSchemaCommand(appId, schema));
   }
 
-  executeCreateDatabaseScript = (appId: string | number, scripts: ExecuteScriptDto) => {
-    return this.commandBus.execute(new ExecuteScriptCommand(appId, scripts));
+  executeCreateDatabaseScript = async (appId: string | number, scripts: ExecuteScriptDto) => {
+    const workspaceConnection = await this.getWorkspaceConnection();
+    return this.commandBus.execute(new ExecuteScriptCommand(workspaceConnection,appId, scripts));
   }
 
   async isExistedWorkspace() {

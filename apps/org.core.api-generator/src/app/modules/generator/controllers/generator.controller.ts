@@ -34,11 +34,14 @@ export class GeneratorController {
 
   @Post('app/:appid/script')
   @HttpCode(201)
-  executeCreateDbScript(
+  async executeCreateDbScript(
     @Param('appid') appId: string,
     @Body() scripts: ExecuteScriptDto
   ) {
-    return this.service.executeCreateDatabaseScript(appId, scripts);
+    const executeResult = await this.service.executeCreateDatabaseScript(appId, scripts);
+    return new ResponseBase(201, 'Execute create databsse by script success', {
+      executed: executeResult
+    });
   }
 
   @Post('app')

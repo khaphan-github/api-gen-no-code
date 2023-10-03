@@ -9,6 +9,8 @@ export const APPLICATIONS_TABLE_AVAILABLE_COLUMS = [
   "tables_info",
   "database_config",
   "use_default_db",
+  "create_db_ui",
+  "create_db_script",
   "enable",
   "created_at",
   'updated_at'
@@ -23,8 +25,8 @@ export const CREATE_WORKSPACE_TABLE_SCRIPT = `
     plugin_config JSONB,
     genneral_config JSONB,
 
-    created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    created_at timestamp(0) without time zone DEFAULT NOW(),
+    updated_at timestamp(0) without time zone DEFAULT NOW()
   );
 `;
 
@@ -48,8 +50,8 @@ export const CREATE_GENERATED_APIS_TABLE_SCRIPT = `
     response_atributes JSONB,
     enable BOOLEAN,
     
-    created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    created_at timestamp(0) without time zone DEFAULT NOW(),
+    updated_at timestamp(0) without time zone DEFAULT NOW() 
   );
 `;
 
@@ -61,12 +63,15 @@ export const CREATE_APPLICATIONS_TABLE_SCRIPT = `
     app_name VARCHAR(255),
     
     tables_info JSONB,
+    create_db_script VARCHAR,
+    create_db_ui JSONB,
+
     database_config JSONB,
     use_default_db BOOLEAN,
     enable BOOLEAN,
 
-    created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    created_at timestamp(0) without time zone DEFAULT NOW(),
+    updated_at timestamp(0) without time zone DEFAULT NOW()
   );
 `;
 
