@@ -1,4 +1,4 @@
-import _, { isBuffer } from "lodash";
+import _ from "lodash";
 
 export interface ConditionObject {
   and?: ConditionObject[];
@@ -28,7 +28,10 @@ export class RelationalDBQueryBuilder {
   constructor(
     private table?: string,
     public columns?: string[]
-  ) { }
+  ) {
+    this.table = table ?? '';
+    this.columns = columns ?? [];
+  }
 
   setTableName = (tableName: string) => {
     this.table = tableName;

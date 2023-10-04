@@ -32,7 +32,7 @@ export class GetWorkspaceByIdQueryHandler
   ) {
     this.queryBuilder = new RelationalDBQueryBuilder();
   }
-
+  // DONE
   async execute(query: GetWorkspaceByIdQuery) {
     const { workspaceConnections } = query;
     try {

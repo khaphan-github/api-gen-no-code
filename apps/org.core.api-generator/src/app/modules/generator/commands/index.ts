@@ -4,6 +4,7 @@ import { CreateSchemaCommandHandler } from "./create-schema.command";
 import { DropSchemaCommandHandler } from "./drop-schema.command";
 import { ExecuteScriptCommandHandler } from "./execute-script.command";
 import { CreateApplicationCommandHandler } from "./create-app.command";
+import { TaskGenerateAPIsCommandHandler } from "./create-apis-task.command";
 
 export const CommandHandlers = [
   CreateSchemaCommandHandler,
@@ -12,4 +13,5 @@ export const CommandHandlers = [
   ExecuteScriptCommandHandler,
   CreateWorkspaceCommandHandler,
   CreateApplicationCommandHandler,
+  TaskGenerateAPIsCommandHandler,
 ];

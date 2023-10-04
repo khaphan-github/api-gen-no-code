@@ -3,6 +3,8 @@ import { JsonIoService } from '../../shared/json.io.service';
 import { DataSourceOptions } from 'typeorm';
 import _ from 'lodash';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
+import { AppCoreDomain } from '../../../domain/app.core.domain';
+
 // #region error
 export class WorkspaceConnectionNotFound extends Error implements ErrorStatusCode {
   statusCode: number;
@@ -23,22 +25,23 @@ export class WorkspaceIdShouldNotBeEmpty extends Error implements ErrorStatusCod
 }
 // #endregion error
 
-export class GetWorkspaceConnectionQuery {
-  constructor(
-    public readonly workspaceId: string | number,
-  ) { }
-}
+export class GetWorkspaceConnectionQuery { }
+
 @QueryHandler(GetWorkspaceConnectionQuery)
 export class GetWorkspaceConnectionQueryHandler
   implements IQueryHandler<GetWorkspaceConnectionQuery>
 {
+  private readonly appCoreDomain!: AppCoreDomain;
   constructor(
     private readonly jsonIO: JsonIoService,
-  ) { }
-  // TODO: In future need to chage way to get this connetions.
+  ) {
+    this.appCoreDomain = new AppCoreDomain();
+  }
+  // TODO: In future need to chage way to get this connetions/ get from sheet... same same,
+  // DONE
   // @return database connection of workspace
-  execute(query: GetWorkspaceConnectionQuery): Promise<DataSourceOptions> {
-    const { workspaceId } = query;
+  execute(): Promise<DataSourceOptions> {
+    const workspaceId = this.appCoreDomain.getDefaultWorkspaceId();
     if (_.isNil(workspaceId)) {
       return Promise.reject(new WorkspaceIdShouldNotBeEmpty());
     }

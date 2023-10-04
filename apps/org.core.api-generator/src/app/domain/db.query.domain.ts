@@ -1,6 +1,3 @@
-import { ClientConfig } from "pg";
-import { AppConfigDomain } from "./app.core.domain";
-
 
 export enum AvailableDB {
   PG = 'postgres',
@@ -29,15 +26,4 @@ export class DbQueryDomain {
     return `user.config.db/app_${appId}.config.json`;
   }
 
-
-  getPGDbConfig = (appConfig: AppConfigDomain): ClientConfig => {
-    const pgConfig: ClientConfig = {
-      host: appConfig.host,
-      port: appConfig.port,
-      user: appConfig.username,
-      password: appConfig.password,
-      database: appConfig.databaseName
-    }
-    return pgConfig;
-  }
 }

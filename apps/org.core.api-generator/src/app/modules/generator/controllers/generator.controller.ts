@@ -14,15 +14,6 @@ export class GeneratorController {
     private readonly service: GeneratorService,
   ) { }
 
-  @Get('apps')
-  @HttpCode(200)
-  @ApiOperation({
-    description: `Lấy danh sach apps`
-  })
-  async getConfig() {
-    return new ResponseBase(200, 'Create app success', await this.service.getApps());
-  }
-
   @Delete('app/:appid/schema/:schema')
   @HttpCode(204)
   async dropTable(
@@ -39,9 +30,7 @@ export class GeneratorController {
     @Body() scripts: ExecuteScriptDto
   ) {
     const executeResult = await this.service.executeCreateDatabaseScript(appId, scripts);
-    return new ResponseBase(201, 'Execute create databsse by script success', {
-      executed: executeResult
-    });
+    return new ResponseBase(201, 'Execute create databsse by script success', executeResult);
   }
 
   @Post('app')
@@ -53,6 +42,22 @@ export class GeneratorController {
         return new ResponseBase(-111, 'Không thể kế nối đến databsse', appCreated);
     }
     return new ResponseBase(200, 'Create app success', appCreated);
+  }
+
+  @Get('app/:appid/script')
+  async getScriptByAppId(
+    @Param('appid') appId: number,
+  ) {
+    const ownerID = 'test_owner_id';
+    try {
+      const script = await this.service.getCreateDbScriptByAppId(appId, ownerID);
+      if (script?.length === 0) {
+        return new ResponseBase(404, `Not found script by app id ${appId}`);
+      }
+      return new ResponseBase(200, 'Get create data base script success', script);
+    } catch (error) {
+      return new ResponseBase(601, error.message);
+    }
   }
 
   @Get('workspace')

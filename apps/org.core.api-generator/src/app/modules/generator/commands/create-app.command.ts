@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
 import { AppCoreDomain } from '../../../domain/app.core.domain';
@@ -28,7 +27,7 @@ export class CreateApplicationCommandHandler
     private readonly jsonIO: JsonIoService,
   ) {
     this.appCoreDomain = new AppCoreDomain();
-    this.queryBuilder = new RelationalDBQueryBuilder();
+    this.queryBuilder = new RelationalDBQueryBuilder(APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS);
 
   }
 
@@ -41,9 +40,8 @@ export class CreateApplicationCommandHandler
       const workspaceDbConfig = this.jsonIO.readJsonFile<DataSourceOptions>(
         this.appCoreDomain.getDefaultWorkspaceId().toString()
       );
+
       if (workspaceDbConfig) {
-        this.queryBuilder.setColumns(APPLICATIONS_TABLE_AVAILABLE_COLUMS);
-        this.queryBuilder.setTableName(APPLICATIONS_TABLE_NAME);
         let query = '';
         let queryParams = [];
         const responseColumns = ['id', 'workspace_id', 'app_name', 'enable', 'use_default_db', 'updated_at'];

@@ -1,5 +1,6 @@
 import { DataSourceOptions } from "typeorm";
 import { CREATE_APPLICATIONS_TABLE_SCRIPT, CREATE_GENERATED_APIS_TABLE_SCRIPT, CREATE_WORKSPACE_TABLE_SCRIPT, WORKSPACE_TABLE_NAME } from "./app.core.domain.script";
+import { AST } from "node-sql-parser";
 
 export type AppConfigDomain = {
   appName: string;
@@ -47,7 +48,7 @@ export class AppCoreDomain {
   }
 
   getDefaultWorkspaceId() {
-    return 2023;
+    return `user.config.db/workspace.config.json`;
   }
 
   // Script to insert new recored to workspace table,
@@ -77,4 +78,7 @@ export class AppCoreDomain {
     }
   }
 
+  extranTableInforFromSQLParser = (parsed: AST | AST[]) => {
+    return JSON.stringify(parsed);
+  }
 }

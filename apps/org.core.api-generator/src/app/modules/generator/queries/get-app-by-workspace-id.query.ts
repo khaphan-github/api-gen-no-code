@@ -1,8 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { JsonIoService } from '../../shared/json.io.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { AppCoreDomain } from '../../../domain/app.core.domain';
 import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
 import { Logger } from '@nestjs/common';
 
@@ -17,16 +15,13 @@ export class GetAppsByWorkspaceIdQuery {
 export class GetAppsByWorkspaceIdQueryHandler
   implements IQueryHandler<GetAppsByWorkspaceIdQuery>
 {
-  private readonly appCoreDomain!: AppCoreDomain;
   private readonly queryBuilder!: RelationalDBQueryBuilder;
   private readonly logger = new Logger(GetAppsByWorkspaceIdQueryHandler.name);
 
-  constructor(
-    private readonly jsonIO: JsonIoService,
-  ) {
-    this.appCoreDomain = new AppCoreDomain();
+  constructor() {
     this.queryBuilder = new RelationalDBQueryBuilder();
   }
+  // DONE
   async execute(query: GetAppsByWorkspaceIdQuery) {
     const { ownerId, workspaceId, workspaceConnections } = query;
     try {
