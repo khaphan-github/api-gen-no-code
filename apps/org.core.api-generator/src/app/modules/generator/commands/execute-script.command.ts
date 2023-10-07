@@ -1,4 +1,4 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { Logger } from '@nestjs/common';
@@ -6,8 +6,9 @@ import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTable
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import _ from 'lodash';
-import { Parser } from 'node-sql-parser';
+import { Option, Parser } from 'node-sql-parser';
 import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { GenerateApisEvent } from '../events/execute-sql-create-db.event';
 
 export class CantNotUpdateDBScript extends Error implements ErrorStatusCode {
   statusCode: number;
@@ -39,7 +40,8 @@ export class NullAttributeError extends Error implements ErrorStatusCode {
 export class ExecuteScriptCommand {
   constructor(
     public readonly workspaceConnections: DataSourceOptions,
-    public readonly appId: number | string,
+    public readonly appId: number,
+    public readonly ownerId: string,
     public readonly script: ExecuteScriptDto,
   ) { }
 }
@@ -53,7 +55,9 @@ export class ExecuteScriptCommandHandler
 
   private readonly logger!: Logger;
 
-  constructor() {
+  constructor(
+    private readonly eventBus: EventBus,
+  ) {
     this.queryBuilder = new RelationalDBQueryBuilder(
       APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS
     );
@@ -65,34 +69,35 @@ export class ExecuteScriptCommandHandler
 
   // DONE
   async execute(command: ExecuteScriptCommand) {
-    const { appId, script, workspaceConnections } = command;
+    const { appId, ownerId, script, workspaceConnections } = command;
 
-    if (_.isNil(appId)) {
-      throw new NullAttributeError('appId');
-    };
-    if (_.isNil(script.script)) {
-      throw new NullAttributeError('script');
-    }
-    if (_.isNil(workspaceConnections)) {
-      throw new NullAttributeError('workspaceConnections');
-    }
+    if (_.isNil(appId)) throw new NullAttributeError('appId');
+    if (_.isNil(script.script)) throw new NullAttributeError('script');
+    if (_.isNil(workspaceConnections)) throw new NullAttributeError('workspaceConnections');
 
     // #region init necessary static data
-    const executeScriptTransaction = `BEGIN; ${script.script} COMMIT;`
-
     const { params, queryString } = this.queryBuilder.getByQuery({
       conditions: { id: appId.toString() },
       size: 1,
     }, ['database_config', 'use_default_db']);
 
     // Docs: https://www.npmjs.com/package/node-sql-parser
-    const createDBSCriptParser = this.queryParser.astify(script.script);
-    const tableInfoParsed = this.appCoreDomain.extranTableInforFromSQLParser(createDBSCriptParser);
-    // #endregion init necessary static data
+    // TODO: Database type:
+    const parserOptions: Option = {
+      database: 'Postgresql'
+    }
+    const createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
+    const tableInfoParsed = this.appCoreDomain.extractTableInforFromSQLParser(createDBSCriptParser);
 
+    const renamedParser = this.appCoreDomain.convertTableNameByAppId(appId, createDBSCriptParser);
+    const scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
+    const executeScriptTransaction = `BEGIN; ${scriptTableRenamed}; COMMIT;`
+
+    // #endregion init necessary static data
+    let workspaceTypeormDataSource: DataSource;
     try {
       // #region get application database config using workspace connection;
-      const workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
+      workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
 
       const [appDatabaseConfig, executeUpdateApp] = await Promise.all([
         workspaceTypeormDataSource.query(queryString, params),
@@ -113,13 +118,17 @@ export class ExecuteScriptCommandHandler
 
       if (use_default_db) {
         await workspaceTypeormDataSource.query(executeScriptTransaction);
-        await workspaceTypeormDataSource.destroy();
       } else {
         const appTypeOrmDataSource = await new DataSource(database_config).initialize();
         await appTypeOrmDataSource.query(executeScriptTransaction);
         await appTypeOrmDataSource.destroy();
       }
       // #endregion execute script create database from user
+
+      // Execute task gennerate api;
+      this.eventBus.publish(
+        new GenerateApisEvent(workspaceConnections, ownerId, appId, createDBSCriptParser)
+      );
 
       return {
         updateAppResult: executeUpdateApp,
@@ -128,6 +137,8 @@ export class ExecuteScriptCommandHandler
     } catch (error) {
       this.logger.error(error.message);
       throw new CantNotExecuteScript(appId, error.message);
+    } finally {
+      await workspaceTypeormDataSource.destroy();
     }
   }
 }

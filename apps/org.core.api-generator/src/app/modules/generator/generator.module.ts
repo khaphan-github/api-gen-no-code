@@ -6,6 +6,8 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { JsonIoService } from '../shared/json.io.service';
 import NodeCache from 'node-cache';
 import { GeneratorService } from './services/generator.service';
+import { GenerateAPISagas } from './sagas/generate-api.saga';
+import { GenerateApisEventHandler } from './events/execute-sql-create-db.event';
 
 @Module({
     imports: [
@@ -18,6 +20,9 @@ import { GeneratorService } from './services/generator.service';
         JsonIoService,
         NodeCache,
         GeneratorService,
+
+        GenerateAPISagas,
+        GenerateApisEventHandler,
     ],
 })
 export class GeneratorModule { }

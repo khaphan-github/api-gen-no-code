@@ -1,6 +1,7 @@
 import { DataSourceOptions } from "typeorm";
 import { CREATE_APPLICATIONS_TABLE_SCRIPT, CREATE_GENERATED_APIS_TABLE_SCRIPT, CREATE_WORKSPACE_TABLE_SCRIPT, WORKSPACE_TABLE_NAME } from "./app.core.domain.script";
-import { AST } from "node-sql-parser";
+import { AST, Create } from "node-sql-parser";
+import _ from "lodash";
 
 export type AppConfigDomain = {
   appName: string;
@@ -51,34 +52,33 @@ export class AppCoreDomain {
     return `user.config.db/workspace.config.json`;
   }
 
-  // Script to insert new recored to workspace table,
-  insertWorkspace(workspaceInfo: ICreateWorkspace) {
-    return {
-      query: `
-        INSERT INTO ${WORKSPACE_TABLE_NAME} (
-          id,
-          owner_id, 
-          database_config, 
-          plugin_config, 
-          genneral_config, 
-          created_at, 
-          updated_at
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7);
-      `,
-      params: [
-        this.getDefaultWorkspaceId(),
-        workspaceInfo.ownerId,
-        workspaceInfo.database_config,
-        workspaceInfo.plugin_config,
-        workspaceInfo.genneral_config,
-        new Date(),
-        new Date(),
-      ]
-    }
+  extractTableInforFromSQLParser = (parsed: AST | AST[]) => {
+    return JSON.stringify(parsed);
   }
 
-  extranTableInforFromSQLParser = (parsed: AST | AST[]) => {
-    return JSON.stringify(parsed);
+  convertTableNameByAppId(appId: number, parsed: AST | AST[]) {
+    // get table;
+    const renameTable = (appId: number, tableName: string) => {
+      return `app_${appId}_${tableName.toLocaleLowerCase()}`;
+    }
+
+    const findAttribute = (ast: Create) => {
+      if (ast?.table[0]?.table) {
+        ast.table[0].table = renameTable(appId, ast.table[0]?.table);
+      }
+      _.forEach(ast?.create_definitions, (value) => {
+        if (value?.reference_definition?.table[0]?.table) {
+          value.reference_definition.table[0].table = renameTable(appId, value.reference_definition.table[0].table);
+        }
+      });
+      return ast;
+    }
+    if (_.isArray(parsed)) {
+      return _.map(parsed, (ast: Create) => {
+        return findAttribute(ast);
+      });
+    } else {
+      return findAttribute(parsed as Create);
+    }
   }
 }

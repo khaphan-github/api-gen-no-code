@@ -59,12 +59,14 @@ export class RelationalDBQueryBuilder {
   insert = (data: object, returning?: string[]): QueryBuilderResult => {
     const columns = Object.keys(data);
 
-    this.validateColumns(returning);
     this.validateColumns(columns);
-
-
     const placeholders = columns.map((_, index) => `$${index + 1}`).join(', ');
-    const returningQuery = returning ? returning.join(', ') : '*';
+
+    let returningQuery = '*';
+    if (returning && returning?.length > 0) {
+      this.validateColumns(returning);
+      returningQuery = returning.join(', ');
+    }
 
     const queryString = `
      INSERT INTO ${this.table} (${columns.join(', ')}) 
@@ -77,6 +79,44 @@ export class RelationalDBQueryBuilder {
     return {
       queryString: queryString,
       params: values
+    };
+  }
+
+  insertMany = (data: object[], returning?: string[]): QueryBuilderResult => {
+    let valueArray: unknown[] = [];
+    const placeholdersValue: string[] = [];
+
+    const availableColums = Object.keys(data[0]);
+    let paramIndex = 0;
+    data?.forEach((obj) => {
+      const columns = Object.keys(obj);
+      this.validateColumns(columns);
+
+      const placeholders = columns?.map(() => {
+        paramIndex += 1;
+        return `$${paramIndex}`;
+      });
+      placeholdersValue.push(`(${placeholders.join(', ')})`);
+
+      const values = Object.values(obj);
+      valueArray = valueArray.concat(values);
+    })
+
+    let returningQuery = '';
+    if (returning && returning?.length > 0) {
+      this.validateColumns(returning);
+      returningQuery = `RETURNING ${returning.join(', ')}`;
+    } 
+
+    const queryString = `
+    INSERT INTO ${this.table} (${availableColums.join(', ')}) 
+    VALUES ${placeholdersValue.join(`,`)}
+    ${returningQuery};
+   `;
+
+    return {
+      queryString: queryString,
+      params: valueArray
     };
   }
 

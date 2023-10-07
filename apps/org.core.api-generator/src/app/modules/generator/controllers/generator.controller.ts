@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { GeneratorService } from '../services/generator.service';
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
@@ -23,13 +23,23 @@ export class GeneratorController {
     return new ResponseBase(200, 'Delete schema successs', await this.service.dropSchema(appId, schema));
   }
 
+  @Get('app/:appid/schema')
+  async getSchemasByAppId(
+    @Param('appid') appId: number,
+  ) {
+    const ownerID = 'test_owner_id';
+    return new ResponseBase(200, 'Get schemas success', await this.service.getSchemasByAppId(appId, ownerID));
+  }
+
   @Post('app/:appid/script')
   @HttpCode(201)
   async executeCreateDbScript(
-    @Param('appid') appId: string,
+    @Param('appid') appId: number,
     @Body() scripts: ExecuteScriptDto
   ) {
-    const executeResult = await this.service.executeCreateDatabaseScript(appId, scripts);
+    const ownerID = 'test_owner_id';
+
+    const executeResult = await this.service.executeCreateDatabaseScript(appId, ownerID, scripts);
     return new ResponseBase(201, 'Execute create databsse by script success', executeResult);
   }
 

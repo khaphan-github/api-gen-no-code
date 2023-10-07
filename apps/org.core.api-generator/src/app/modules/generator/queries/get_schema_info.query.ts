@@ -7,8 +7,8 @@ import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-bui
 export class GetSchemaInfoByAppIdQuery {
   constructor(
     public readonly workspaceConnections: DataSourceOptions,
-    public readonly appid: string,
     public readonly ownerId: string,
+    public readonly appid: number,
   ) { }
 }
 @QueryHandler(GetSchemaInfoByAppIdQuery)
@@ -25,35 +25,32 @@ export class GetSchemaInfoByAppIdQueryHandler
 
     this.logger = new Logger(GetSchemaInfoByAppIdQueryHandler.name);
   }
+
   async execute(query: GetSchemaInfoByAppIdQuery) {
     const { appid, ownerId, workspaceConnections } = query;
+    const { queryString, params } = this.queryBuilder.getByQuery(
+      {
+        conditions: {
+          and: [
+            { [EAppTableColumns.ID]: appid.toString() },
+            { [EAppTableColumns.OWNER_ID]: ownerId },
+          ]
+        }
+      },
+      [
+        EAppTableColumns.TABLES_INFO,
+      ]);
+    let workspaceTypeormDataSource: DataSource;
     try {
-      const { queryString, params } = this.queryBuilder.getByQuery(
-        {
-          conditions: {
-            and: [
-              { [EAppTableColumns.ID]: appid.toString() },
-              { [EAppTableColumns.OWNER_ID]: ownerId },
-            ]
-          }
-        },
-        [
-          EAppTableColumns.ID,
-          EAppTableColumns.DATABASE_CONFIG,
-          EAppTableColumns.USE_DEFAULT_DB,
-        ]);
-
-      const workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
+      workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = (await workspaceTypeormDataSource.query(queryString, params))[0];
-
-      if (queryResult[EAppTableColumns.USE_DEFAULT_DB]) {
-        // workspaceTypeormDataSource.query(this.queryBuilder.getSchemaInfo())
-      }
-      // TODO: Get connection by appId: use this connection to connect to this database 
-      // Get table informations:
-
+      return queryResult?.tables_info;
     } catch (error) {
-      //  
+      this.logger.error(error);
+      return undefined;
+    }
+    finally {
+      workspaceTypeormDataSource.destroy();
     }
   }
 }

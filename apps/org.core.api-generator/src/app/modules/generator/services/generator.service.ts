@@ -12,6 +12,7 @@ import { CreateApplicationCommand } from "../commands/create-app.command";
 import { GetAppsByWorkspaceIdQuery } from "../queries/get-app-by-workspace-id.query";
 import { GetWorkspaceConnectionQuery } from "../queries/get-workspace-connection.query";
 import { GetCreatedDbScriptByAppIdQuery } from "../queries/get-app-createdb-script.query";
+import { GetSchemaInfoByAppIdQuery } from "../queries/get_schema_info.query";
 
 @Injectable()
 export class GeneratorService {
@@ -19,6 +20,10 @@ export class GeneratorService {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) { }
+
+  private getWorkspaceConnection() {
+    return this.queryBus.execute(new GetWorkspaceConnectionQuery());
+  }
 
   createWorkspace(createAppDto: CreateWorkspaceDto) {
     return this.commandBus.execute(new CreateWorkspaceCommand(createAppDto));
@@ -28,9 +33,9 @@ export class GeneratorService {
     return this.commandBus.execute(new DropSchemaCommand(appId, schema));
   }
 
-  executeCreateDatabaseScript = async (appId: string | number, scripts: ExecuteScriptDto) => {
+  executeCreateDatabaseScript = async (appId: number, ownerId: string, scripts: ExecuteScriptDto) => {
     const workspaceConnection = await this.getWorkspaceConnection();
-    return this.commandBus.execute(new ExecuteScriptCommand(workspaceConnection, appId, scripts));
+    return this.commandBus.execute(new ExecuteScriptCommand(workspaceConnection, appId, ownerId, scripts));
   }
 
   async isExistedWorkspace() {
@@ -61,7 +66,8 @@ export class GeneratorService {
     return this.queryBus.execute(new GetCreatedDbScriptByAppIdQuery(workspaceConnection, ownerId, appId));
   }
 
-  private getWorkspaceConnection() {
-    return this.queryBus.execute(new GetWorkspaceConnectionQuery());
+  async getSchemasByAppId(appId: number, ownerId: string) {
+    const workspaceConnection = await this.getWorkspaceConnection();
+    return this.queryBus.execute(new GetSchemaInfoByAppIdQuery(workspaceConnection, ownerId, appId));
   }
 } 

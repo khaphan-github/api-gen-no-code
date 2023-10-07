@@ -1,14 +1,15 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
-import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
 import { AppCoreDomain } from '../../../domain/app.core.domain';
 import { JsonIoService } from '../../shared/json.io.service';
+import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { EWorkspaceColumns, WORKSPACE_AVAILABLE_COLUMNS, WORKSPACE_TABLE_NAME } from '../../../domain/app.core.domain.script';
 
 export class AppAlreadyExistError extends Error {
   constructor(
-    appName: string,
+    public readonly appName: string,
     public readonly statusCode?: number,
     public readonly metadata?: object,
   ) {
@@ -26,16 +27,16 @@ export class CreateWorkspaceCommand {
 export class CreateWorkspaceCommandHandler
   implements ICommandHandler<CreateWorkspaceCommand>
 {
-  private readonly dbQueryDomain!: DbQueryDomain;
   private readonly appCoreDomain!: AppCoreDomain;
+  private readonly queryBuilder!: RelationalDBQueryBuilder;
 
   private readonly logger = new Logger(CreateWorkspaceCommandHandler.name);
 
   constructor(
     private readonly jsonIO: JsonIoService,
   ) {
-    this.dbQueryDomain = new DbQueryDomain();
     this.appCoreDomain = new AppCoreDomain();
+    this.queryBuilder = new RelationalDBQueryBuilder(WORKSPACE_TABLE_NAME, WORKSPACE_AVAILABLE_COLUMNS);
   }
 
   /**LOGIC:
@@ -73,13 +74,16 @@ export class CreateWorkspaceCommandHandler
       `
       await typeormDataSource.query(queryInitCoreTable);
 
-      // TODO: CHECK IF THIS CONFIG INSERT YEt -> update;
-      const insertConfig = this.appCoreDomain.insertWorkspace({
-        database_config: dbConfig,
-        ownerId: 'test_owner_id',
+      const { params, queryString } = this.queryBuilder.insert({
+        [EWorkspaceColumns.DATABASE_CONFIG]: dbConfig,
+        [EWorkspaceColumns.OWNER_ID]: 'test_owner_id',
+        [EWorkspaceColumns.CREATED_AT]: new Date(),
+        [EWorkspaceColumns.UPDATED_AT]: new Date(),
       });
 
-      return typeormDataSource.query(insertConfig.query, insertConfig.params);;
+      const queryResult = await typeormDataSource.query(queryString, params);
+      typeormDataSource.destroy();
+      return queryResult;
     } catch (error) {
       this.logger.error(error);
       return error;

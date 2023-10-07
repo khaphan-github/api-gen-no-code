@@ -27,32 +27,32 @@ export class GetCreatedDbScriptByAppIdQueryHandler
   // DONE
   async execute(query: GetCreatedDbScriptByAppIdQuery) {
     const { ownerId, appId, workspaceConnections } = query;
+
+    const { queryString, params } = this.queryBuilder.getByQuery(
+      {
+        conditions: {
+          and: [
+            { [EAppTableColumns.ID]: appId.toString() },
+            { [EAppTableColumns.OWNER_ID]: ownerId },
+          ]
+        }
+      },
+      [
+        EAppTableColumns.ID,
+        EAppTableColumns.CREATE_DB_SCRIPT,
+        EAppTableColumns.UPDATED_AT,
+        EAppTableColumns.CREATED_AT,
+      ]);
+
+    let typeormDataSource: DataSource;
     try {
-      const { queryString, params } = this.queryBuilder.getByQuery(
-        {
-          conditions: {
-            and: [
-              { [EAppTableColumns.ID]: appId.toString() },
-              { [EAppTableColumns.OWNER_ID]: ownerId },
-            ]
-          }
-        },
-        [
-          EAppTableColumns.ID,
-          EAppTableColumns.CREATE_DB_SCRIPT,
-          EAppTableColumns.UPDATED_AT,
-          EAppTableColumns.CREATED_AT,
-        ]);
-
-        const typeormDataSource = await new DataSource(workspaceConnections).initialize();
+      typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
-
-      await typeormDataSource.destroy();
-
       return queryResult[0];
-
     } catch (error) {
       this.logger.error(error);
+    } finally {
+      await typeormDataSource.destroy();
     }
   }
 }

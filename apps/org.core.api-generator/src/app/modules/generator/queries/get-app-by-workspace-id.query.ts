@@ -19,32 +19,31 @@ export class GetAppsByWorkspaceIdQueryHandler
   private readonly logger = new Logger(GetAppsByWorkspaceIdQueryHandler.name);
 
   constructor() {
-    this.queryBuilder = new RelationalDBQueryBuilder();
+    this.queryBuilder = new RelationalDBQueryBuilder(APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS);
   }
   // DONE
   async execute(query: GetAppsByWorkspaceIdQuery) {
     const { ownerId, workspaceId, workspaceConnections } = query;
+    let typeormDataSource: DataSource;
+
+    const { queryString, params } = this.queryBuilder.getByQuery({
+      conditions: {
+        and: [
+          { owner_id: ownerId },
+          { workspace_id: workspaceId.toString() },
+        ]
+      }
+    }, ['id', 'workspace_id', 'app_name', 'enable', 'use_default_db', 'updated_at']);
+
     try {
-      const typeormDataSource = await new DataSource(workspaceConnections).initialize();
-
-      this.queryBuilder.setColumns(APPLICATIONS_TABLE_AVAILABLE_COLUMS);
-      this.queryBuilder.setTableName(APPLICATIONS_TABLE_NAME);
-
-      const { queryString, params } = this.queryBuilder.getByQuery({
-        conditions: {
-          and: [
-            { owner_id: ownerId },
-            { workspace_id: workspaceId.toString() },
-          ]
-        }
-      }, ['id', 'workspace_id', 'app_name', 'enable', 'use_default_db', 'updated_at']);
-
+      typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
-      await typeormDataSource.destroy();
+      
       return queryResult;
-
     } catch (error) {
       this.logger.error(error);
+    } finally {
+      typeormDataSource.destroy();
     }
   }
 }
