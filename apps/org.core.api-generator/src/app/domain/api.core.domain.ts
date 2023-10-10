@@ -35,102 +35,91 @@ export class ApisCoreDomain {
           apis.push(api.query);
         });
         return apis;
+      } else {
+        const api = this.mapASTToAPI(appId, secretKey, tableInfo as Create);
+        apis.push(api.insert);
+        apis.push(api.update);
+        apis.push(api.delete);
+        apis.push(api.query);
       }
-      const api = this.mapASTToAPI(appId, secretKey, tableInfo as Create);
-      apis.push(api.insert);
-      apis.push(api.update);
-      apis.push(api.delete);
-      apis.push(api.query);
     } catch (error) {
-      console.log('This is forence key');
+      console.log('NEED TO HANDLE FORIENCE KEY EXTRACT API');
     }
 
     return apis;
   }
 
   mapASTToAPI = (appId: number, secretKey: string, _info: Create) => {
-    const requestBody = {};
-    _info?.create_definitions?.forEach(item => {
-      if (item.column) {
-        const columnName = item?.column?.column;
-        requestBody[columnName] = 'Điền dữ liệu của bạn tại đây';
-      }
-    });
-    const insert = {
-      [EGeneratedApisTableColumns.APP_ID]: appId,
-      [EGeneratedApisTableColumns.TABLE_NAME]: _info?.table[0]?.table,
-      [EGeneratedApisTableColumns.ACTION]: ApiAction.INSERT,
-      [EGeneratedApisTableColumns.API_PATH]: `/api/v1/app/${appId}/schema/${_info?.table[0]?.table}`,
-      [EGeneratedApisTableColumns.HTTP_METHOD]: RestFulMethod.POST,
-      [EGeneratedApisTableColumns.AUTHENTICATION]: Authenticate.NO_AUTH,
-      [EGeneratedApisTableColumns.HEADERS]: JSON.stringify({
-        AppClientSecretKey: secretKey
-      }),
-      [EGeneratedApisTableColumns.REQUEST_BODY]: JSON.stringify([requestBody]),
-      [EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES]: JSON.stringify([requestBody]),
+    const query = this.getApiConfig(appId, _info, RestFulMethod.GET, secretKey);
+    const insert = this.getApiConfig(appId, _info, RestFulMethod.POST, secretKey);
+    const update = this.getApiConfig(appId, _info, RestFulMethod.PUT, secretKey);
+    const _delete = this.getApiConfig(appId, _info, RestFulMethod.DELETE, secretKey);
 
-      [EGeneratedApisTableColumns.ENABLE]: true,
-      [EGeneratedApisTableColumns.CREATED_AT]: new Date(),
-      [EGeneratedApisTableColumns.UPDATED_AT]: new Date(),
-    };
-
-    const update = {
-      [EGeneratedApisTableColumns.APP_ID]: appId,
-      [EGeneratedApisTableColumns.TABLE_NAME]: _info?.table[0]?.table,
-      [EGeneratedApisTableColumns.ACTION]: ApiAction.UPDATE,
-      [EGeneratedApisTableColumns.API_PATH]: `/api/v1/app/${appId}/schema/${_info?.table[0]?.table}/:id`,
-      [EGeneratedApisTableColumns.HTTP_METHOD]: RestFulMethod.PUT,
-      [EGeneratedApisTableColumns.AUTHENTICATION]: Authenticate.NO_AUTH,
-      [EGeneratedApisTableColumns.HEADERS]: JSON.stringify({
-        AppClientSecretKey: secretKey
-      }),
-      [EGeneratedApisTableColumns.REQUEST_BODY]: JSON.stringify([requestBody]),
-      [EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES]: JSON.stringify([requestBody]),
-
-      [EGeneratedApisTableColumns.ENABLE]: true,
-      [EGeneratedApisTableColumns.CREATED_AT]: new Date(),
-      [EGeneratedApisTableColumns.UPDATED_AT]: new Date(),
-    };
-
-    const _delete = {
-      [EGeneratedApisTableColumns.APP_ID]: appId,
-      [EGeneratedApisTableColumns.TABLE_NAME]: _info?.table[0]?.table,
-      [EGeneratedApisTableColumns.ACTION]: ApiAction.DELETE,
-      [EGeneratedApisTableColumns.API_PATH]: `/api/v1/app/${appId}/schema/${_info?.table[0]?.table}/:id`,
-      [EGeneratedApisTableColumns.HTTP_METHOD]: RestFulMethod.DELETE,
-      [EGeneratedApisTableColumns.AUTHENTICATION]: Authenticate.NO_AUTH,
-      [EGeneratedApisTableColumns.HEADERS]: JSON.stringify({
-        AppClientSecretKey: secretKey
-      }),
-      [EGeneratedApisTableColumns.REQUEST_BODY]: JSON.stringify({}),
-      [EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES]: JSON.stringify({}),
-
-      [EGeneratedApisTableColumns.ENABLE]: true,
-      [EGeneratedApisTableColumns.CREATED_AT]: new Date(),
-      [EGeneratedApisTableColumns.UPDATED_AT]: new Date(),
-    };
-
-    const query = {
-      [EGeneratedApisTableColumns.APP_ID]: appId,
-      [EGeneratedApisTableColumns.TABLE_NAME]: _info?.table[0]?.table,
-      [EGeneratedApisTableColumns.ACTION]: ApiAction.QUERY,
-      [EGeneratedApisTableColumns.API_PATH]: `/api/v1/app/${appId}/schema/${_info?.table[0]?.table}`,
-      [EGeneratedApisTableColumns.HTTP_METHOD]: RestFulMethod.GET,
-      [EGeneratedApisTableColumns.AUTHENTICATION]: Authenticate.NO_AUTH,
-      [EGeneratedApisTableColumns.HEADERS]: JSON.stringify({
-        AppClientSecretKey: secretKey
-      }),
-      [EGeneratedApisTableColumns.REQUEST_BODY]: JSON.stringify({}),
-      [EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES]: JSON.stringify({}),
-      [EGeneratedApisTableColumns.ENABLE]: true,
-      [EGeneratedApisTableColumns.CREATED_AT]: new Date(),
-      [EGeneratedApisTableColumns.UPDATED_AT]: new Date(),
-    };
     return {
       insert: insert,
       update: update,
       delete: _delete,
       query: query
     };
+  }
+
+  getApiConfig = (appId: number, _info: Create, typeApi: RestFulMethod, secretKey: string) => {
+    const apiRecord = {};
+
+    const requestBody = {};
+    _info?.create_definitions?.forEach(item => {
+      if (item.column) {
+        const columnName = item?.column?.column;
+        requestBody[columnName] = 'your_data';
+      }
+    });
+
+    const tableName = (_info?.table[0]?.table as string).toLocaleLowerCase() ?? '';
+    const apiPath = `/api/v1/app/${appId}/schema/${tableName}`;
+
+    apiRecord[EGeneratedApisTableColumns.APP_ID] = appId;
+    apiRecord[EGeneratedApisTableColumns.TABLE_NAME] = tableName;
+    apiRecord[EGeneratedApisTableColumns.HEADERS] = JSON.stringify({
+      AppClientSecretKey: secretKey
+    });
+    apiRecord[EGeneratedApisTableColumns.AUTHENTICATION] = Authenticate.NO_AUTH;
+
+    apiRecord[EGeneratedApisTableColumns.ENABLE] = true;
+    apiRecord[EGeneratedApisTableColumns.CREATED_AT] = new Date();
+    apiRecord[EGeneratedApisTableColumns.UPDATED_AT] = new Date();
+    apiRecord[EGeneratedApisTableColumns.REQUEST_BODY] = JSON.stringify({});
+    apiRecord[EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES] = JSON.stringify({});
+
+    switch (typeApi) {
+      case RestFulMethod.GET:
+        apiRecord[EGeneratedApisTableColumns.API_PATH] = apiPath;
+        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.GET;
+        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.QUERY;
+
+
+        break;
+      case RestFulMethod.POST:
+        apiRecord[EGeneratedApisTableColumns.API_PATH] = apiPath;
+        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.POST;
+        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.INSERT;
+        apiRecord[EGeneratedApisTableColumns.REQUEST_BODY] = JSON.stringify([requestBody]);
+        apiRecord[EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES] = JSON.stringify([requestBody]);
+
+        break;
+      case RestFulMethod.PUT:
+        apiRecord[EGeneratedApisTableColumns.API_PATH] = `${apiPath}/:id`;
+        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.PUT;
+        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.UPDATE;
+        apiRecord[EGeneratedApisTableColumns.REQUEST_BODY] = JSON.stringify([requestBody]);
+        apiRecord[EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES] = JSON.stringify([requestBody]);
+
+        break;
+      case RestFulMethod.DELETE:
+        apiRecord[EGeneratedApisTableColumns.API_PATH] = `${apiPath}/:id`;
+        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.DELETE;
+        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.DELETE;
+        break;
+    }
+    return apiRecord;
   }
 }

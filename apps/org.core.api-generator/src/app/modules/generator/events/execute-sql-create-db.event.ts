@@ -3,7 +3,7 @@ import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { AST } from "node-sql-parser";
 import { DataSourceOptions } from "typeorm";
 
-export class GenerateApisEvent {
+export class ExecutedSQLScriptEvent {
   constructor(
     public readonly workspaceConnections: DataSourceOptions,
     public readonly ownerId: string,
@@ -12,11 +12,11 @@ export class GenerateApisEvent {
   ) { }
 }
 
-@EventsHandler(GenerateApisEvent)
-export class GenerateApisEventHandler implements IEventHandler<GenerateApisEvent> {
-  private readonly logger = new Logger(GenerateApisEventHandler.name);
+@EventsHandler(ExecutedSQLScriptEvent)
+export class ExecutedSQLScriptEventHandler implements IEventHandler<ExecutedSQLScriptEvent> {
+  private readonly logger = new Logger(ExecutedSQLScriptEventHandler.name);
 
   async handle() {
-    this.logger.log(GenerateApisEventHandler.name);
+    this.logger.log(ExecutedSQLScriptEventHandler.name);
   }
 }

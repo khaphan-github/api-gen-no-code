@@ -40,6 +40,5 @@ export class DropSchemaCommandHandler
         message: `${error}`
       }
     }
-
   }
 }

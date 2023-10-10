@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/app.core.domain.script';
+import { GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/app.core.domain.script';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { AST } from 'node-sql-parser';
 import { ApisCoreDomain } from '../../../domain/api.core.domain';
@@ -26,7 +26,9 @@ export class TaskGenerateAPIsCommandHandler
 
   constructor() {
     this.apiCoreDomain = new ApisCoreDomain();
-    this.queryBuilder = new RelationalDBQueryBuilder(GENERATED_APIS_TABLE_NAME, GENERATED_APIS_AVAILABLE_COLUMNS);
+    this.queryBuilder = new RelationalDBQueryBuilder(
+      GENERATED_APIS_TABLE_NAME, GENERATED_APIS_AVAILABLE_COLUMNS
+    );
     this.logger = new Logger(TaskGenerateAPIsCommandHandler.name);
   }
 

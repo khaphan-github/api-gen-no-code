@@ -8,7 +8,7 @@ import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-bui
 import _ from 'lodash';
 import { Option, Parser } from 'node-sql-parser';
 import { AppCoreDomain } from '../../../domain/app.core.domain';
-import { GenerateApisEvent } from '../events/execute-sql-create-db.event';
+import { ExecutedSQLScriptEvent } from '../events/execute-sql-create-db.event';
 
 export class CantNotUpdateDBScript extends Error implements ErrorStatusCode {
   statusCode: number;
@@ -87,9 +87,8 @@ export class ExecuteScriptCommandHandler
       database: 'Postgresql'
     }
     const createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
-    const tableInfoParsed = this.appCoreDomain.extractTableInforFromSQLParser(createDBSCriptParser);
-
     const renamedParser = this.appCoreDomain.convertTableNameByAppId(appId, createDBSCriptParser);
+
     const scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
     const executeScriptTransaction = `BEGIN; ${scriptTableRenamed}; COMMIT;`
 
@@ -103,10 +102,11 @@ export class ExecuteScriptCommandHandler
         workspaceTypeormDataSource.query(queryString, params),
 
         workspaceTypeormDataSource.createQueryBuilder()
-          .update(APPLICATIONS_TABLE_NAME).set({
+          .update(APPLICATIONS_TABLE_NAME)
+          .set({
             [EAppTableColumns.CREATE_DB_SCRIPT]: script.script,
             [EAppTableColumns.UPDATED_AT]: new Date(),
-            [EAppTableColumns.TABLES_INFO]: tableInfoParsed,
+            [EAppTableColumns.TABLES_INFO]: JSON.stringify(renamedParser),
           })
           .where(`${APPLICATIONS_TABLE_NAME}.id = :id`, { id: appId })
           .execute()
@@ -127,7 +127,7 @@ export class ExecuteScriptCommandHandler
 
       // Execute task gennerate api;
       this.eventBus.publish(
-        new GenerateApisEvent(workspaceConnections, ownerId, appId, createDBSCriptParser)
+        new ExecutedSQLScriptEvent(workspaceConnections, ownerId, appId, createDBSCriptParser)
       );
 
       return {

@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
-import { GetDataQueryHandler } from '../queries/get-one.query';
+import { GetDataQueryHandler } from '../queries/get-by-conditions.query';
 import { Logger } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';

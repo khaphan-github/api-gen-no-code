@@ -27,7 +27,7 @@ export class GetCreatedDbScriptByAppIdQueryHandler
   // DONE
   async execute(query: GetCreatedDbScriptByAppIdQuery) {
     const { ownerId, appId, workspaceConnections } = query;
-
+    
     const { queryString, params } = this.queryBuilder.getByQuery(
       {
         conditions: {

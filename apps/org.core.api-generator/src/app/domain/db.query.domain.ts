@@ -7,7 +7,7 @@ export enum AvailableDB {
 }
 export class DbQueryDomain {
   getTableName(appId: string, tableName: string) {
-    return `public.app_id_${appId}_schema_${tableName}`
+    return `app_${appId}_${tableName}`
   }
 
   getCachingTableInfo = (tableName: string) => {
@@ -25,5 +25,7 @@ export class DbQueryDomain {
   getAppConfigJsonFileName = (appId: string | number) => {
     return `user.config.db/app_${appId}.config.json`;
   }
+
+  
 
 }

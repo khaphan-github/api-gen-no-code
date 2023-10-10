@@ -4,6 +4,8 @@ import { DataSourceOptions } from 'typeorm';
 import _ from 'lodash';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
+import NodeCache from 'node-cache';
 
 // #region error
 export class WorkspaceConnectionNotFound extends Error implements ErrorStatusCode {
@@ -15,14 +17,7 @@ export class WorkspaceConnectionNotFound extends Error implements ErrorStatusCod
   }
 }
 
-export class WorkspaceIdShouldNotBeEmpty extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor() {
-    super(`workspaceId should not be empty`);
-    this.name = WorkspaceIdShouldNotBeEmpty.name;
-    this.statusCode = 601
-  }
-}
+
 // #endregion error
 
 export class GetWorkspaceConnectionQuery { }
@@ -34,6 +29,7 @@ export class GetWorkspaceConnectionQueryHandler
   private readonly appCoreDomain!: AppCoreDomain;
   constructor(
     private readonly jsonIO: JsonIoService,
+    private readonly nodeCache: NodeCache,
   ) {
     this.appCoreDomain = new AppCoreDomain();
   }
@@ -43,7 +39,13 @@ export class GetWorkspaceConnectionQueryHandler
   execute(): Promise<DataSourceOptions> {
     const workspaceId = this.appCoreDomain.getDefaultWorkspaceId();
     if (_.isNil(workspaceId)) {
-      return Promise.reject(new WorkspaceIdShouldNotBeEmpty());
+      return Promise.reject(new WorkspaceConnectionShouldNotBeEmpty());
+    }
+
+    const workspaceFromCache = this.nodeCache.get<DataSourceOptions>(workspaceId);
+
+    if (workspaceFromCache) {
+      return Promise.resolve(workspaceFromCache);
     }
 
     let workspaceDBConfig: DataSourceOptions | PromiseLike<DataSourceOptions>;
@@ -51,6 +53,8 @@ export class GetWorkspaceConnectionQueryHandler
     try {
       workspaceDBConfig =
         this.jsonIO.readJsonFile<DataSourceOptions>(workspaceId.toString());
+
+      this.nodeCache.set(workspaceId, workspaceDBConfig);
     } catch (error) {
       return Promise.reject(new Error(error.message));
     }

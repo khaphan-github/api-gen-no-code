@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
 import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { ConditionObject } from '../../../domain/relationaldb.query-builder';
 import { CrudService } from '../services/crud-pg.service';
+import { ResponseBase } from '../../../infrastructure/format/response.base';
 
 @ApiTags('CRUD operator')
 @Controller('app/:appid/schema/:schema')
@@ -35,12 +36,14 @@ export class CrudController {
       }
     }
   })
-  query(
+  @HttpCode(200)
+  async query(
     @Param() requestParamDataDto: RequestParamDataDto,
     @Query() queryParamDataDto: QueryParamDataDto,
-    @Body() conditions: ConditionObject
+    @Body() conditions?: ConditionObject
   ) {
-    return this.service.query(requestParamDataDto, queryParamDataDto, conditions);
+    const queryResult = await this.service.query(requestParamDataDto, queryParamDataDto, conditions);
+    return new ResponseBase(200, 'Query success', queryResult);
   }
 
   @Delete(':id')
@@ -55,16 +58,16 @@ export class CrudController {
   @Post()
   @ApiBody({
     schema: {
-      example: {
+      example: [{
         product_name: 'Sản phẩm test 1',
         description: 'Đây là sản phẩm có năng lực thần kỳ'
-      }
+      }]
     }
   })
   insert(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
-    @Body() data: object
+    @Body() data: Array<object>
   ) {
     return this.service.insert(appId, schema, data);
   }

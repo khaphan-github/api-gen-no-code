@@ -106,7 +106,7 @@ export class RelationalDBQueryBuilder {
     if (returning && returning?.length > 0) {
       this.validateColumns(returning);
       returningQuery = `RETURNING ${returning.join(', ')}`;
-    } 
+    }
 
     const queryString = `
     INSERT INTO ${this.table} (${availableColums.join(', ')}) 
@@ -152,13 +152,9 @@ export class RelationalDBQueryBuilder {
   getByQuery = (types?: SelectQueryType, selected?: string[],): QueryBuilderResult => {
     let selectedQuery = '*';
 
-    if (!_.isNil(selected) && selected) {
+    if (!_.isNil(selected)) {
       this.validateColumns(selected);
-      if (selected.length == 1) {
-        selectedQuery = selected[0];
-      } else {
-        selectedQuery = selected?.join(', ');
-      }
+      selectedQuery = selected.join(', ');
     }
     const defaultQuery = `
       SELECT ${selectedQuery}
@@ -174,7 +170,7 @@ export class RelationalDBQueryBuilder {
       // Prepare where condition
       let whereQuery = '';
       const conditionParams: string[] = [];
-      if (!_.isNil(conditions)) {
+      if (!_.isNil(conditions) && !_.isEmpty(conditions)) {
         const conditionQuery = this.generateConditionQuery(conditions, conditionParams);
         whereQuery = !_.isNil(conditions) ? ` WHERE ${conditionQuery} ` : '';
       }
@@ -252,6 +248,9 @@ export class RelationalDBQueryBuilder {
   }
 
   validateColumns = (columns: string[]) => {
+    if (!columns || columns.length == 0) {
+      throw new Error(`Can not validate columns because columns be empty`);
+    }
     const invalidColumns = columns?.filter(col => !this.columns.includes(col));
     if (invalidColumns.length > 0) {
       throw new Error(`Invalid columns specified: ${invalidColumns.join(', ')}, columns shoud include: ${this.columns.join(', ')}`);

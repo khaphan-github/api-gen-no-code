@@ -16,6 +16,7 @@ import { CrudService } from './services/crud-pg.service';
         ...CommandHandlers,
         NodeCache,
         CrudService,
+        
     ],
 })
 export class CrudModule { }

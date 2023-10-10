@@ -6,6 +6,7 @@ import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
 import { ResponseBase } from '../../../infrastructure/format/response.base';
 import { QueryParamDataDto } from '../../crud-pg/controller/query-filter.dto';
 import { CreateApplicationDto } from '../dto/create-app.dto';
+import { SQLTransformerDto } from './mll.query.dto';
 
 @ApiTags('Api Generator')
 @Controller('generator')
@@ -70,6 +71,20 @@ export class GeneratorController {
     }
   }
 
+  @Get('app/:appid/api')
+  async getApisByAppId(
+    @Param('appid') appId: number,
+  ) {
+    const ownerID = 'test_owner_id';
+
+    try {
+      const apis = await this.service.getApisByAppId(appId, ownerID);
+      return new ResponseBase(200, `Get apis by ${appId} success`, apis);
+    } catch (error) {
+      return new ResponseBase(601, error.message);
+    }
+  }
+
   @Get('workspace')
   @HttpCode(200)
   async isExistedWorkspace() {
@@ -107,4 +122,22 @@ export class GeneratorController {
     const apps = await this.service.getAppsByWorkspaceId(ownerID, id)
     return new ResponseBase(200, 'Get app by workspace id success', apps);
   }
+
+
+  @Post('app/:appid/transformer')
+  @HttpCode(200)
+  async getSQLTransfromer(
+    @Param('appid') appId: number,
+    @Body() sqlTransformerDto: SQLTransformerDto,
+  ) {
+    const ownerID = 'test_owner_id';
+    const result = await this.service.getSQLTransformer(ownerID, appId, sqlTransformerDto);
+    return new ResponseBase(200, 'getSQLTransfromer', {
+      result: result,
+      saveAsAPIPath: `api/v1/app/${appId}/transformer/api`
+    });
+  }
+
+  // TODO: Enable to save this aswer as an api
+
 }

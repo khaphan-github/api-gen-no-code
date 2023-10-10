@@ -1,7 +1,7 @@
-import { GetDataQueryHandler } from "./get-one.query";
+import { GetDataQueryHandler } from "./get-by-conditions.query";
 import { GetSchemaStructureQueryHandler } from "./get-schema-structure.query";
 
 export const QueryHandlers = [
-  GetDataQueryHandler,
+  GetDataQueryHandler, // <-- DONE
   GetSchemaStructureQueryHandler,
 ];

@@ -3,7 +3,7 @@ import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { AST } from "node-sql-parser";
 import { DataSourceOptions } from "typeorm";
 
-export class CreateCoreTablesEvent {
+export class ExecutedSQLByUIEvent {
   constructor(
     public readonly workspaceConnections: DataSourceOptions,
     public readonly ownerId: string,
@@ -12,11 +12,11 @@ export class CreateCoreTablesEvent {
   ) { }
 }
 
-@EventsHandler(CreateCoreTablesEvent)
-export class CreateCoreTablesEventHandler implements IEventHandler<CreateCoreTablesEvent> {
-  private readonly logger = new Logger(CreateCoreTablesEventHandler.name);
+@EventsHandler(ExecutedSQLByUIEvent)
+export class ExecutedSQLByUIEventHandler implements IEventHandler<ExecutedSQLByUIEvent> {
+  private readonly logger = new Logger(ExecutedSQLByUIEventHandler.name);
 
   async handle() {
-    this.logger.log(CreateCoreTablesEventHandler.name);
+    this.logger.log(ExecutedSQLByUIEventHandler.name);
   }
 }

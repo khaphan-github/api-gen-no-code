@@ -1,5 +1,5 @@
 import { DataSourceOptions } from "typeorm";
-import { CREATE_APPLICATIONS_TABLE_SCRIPT, CREATE_GENERATED_APIS_TABLE_SCRIPT, CREATE_WORKSPACE_TABLE_SCRIPT, WORKSPACE_TABLE_NAME } from "./app.core.domain.script";
+import { CREATE_APPLICATIONS_TABLE_SCRIPT, CREATE_GENERATED_APIS_TABLE_SCRIPT, CREATE_WORKSPACE_TABLE_SCRIPT } from "./app.core.domain.script";
 import { AST, Create } from "node-sql-parser";
 import _ from "lodash";
 
@@ -63,15 +63,17 @@ export class AppCoreDomain {
     }
 
     const findAttribute = (ast: Create) => {
-      if (ast?.table[0]?.table) {
-        ast.table[0].table = renameTable(appId, ast.table[0]?.table);
+      const newAst = _.cloneDeep(ast);
+
+      if (newAst?.table[0]?.table) {
+        newAst.table[0].table = renameTable(appId, newAst.table[0]?.table);
       }
-      _.forEach(ast?.create_definitions, (value) => {
+      _.forEach(newAst?.create_definitions, (value) => {
         if (value?.reference_definition?.table[0]?.table) {
           value.reference_definition.table[0].table = renameTable(appId, value.reference_definition.table[0].table);
         }
       });
-      return ast;
+      return newAst;
     }
     if (_.isArray(parsed)) {
       return _.map(parsed, (ast: Create) => {
@@ -79,6 +81,18 @@ export class AppCoreDomain {
       });
     } else {
       return findAttribute(parsed as Create);
+    }
+  }
+
+  getTableNameFromParser(parsed: AST | AST[]) {
+    const returnTableName = (ast: Create) => ast?.table[0]?.table;
+
+    if (_.isArray(parsed)) {
+      return _.map(parsed, (ast: Create) => {
+        return returnTableName(ast);
+      });
+    } else {
+      return returnTableName(parsed as Create);
     }
   }
 }

@@ -7,11 +7,14 @@ import { JsonIoService } from '../shared/json.io.service';
 import NodeCache from 'node-cache';
 import { GeneratorService } from './services/generator.service';
 import { GenerateAPISagas } from './sagas/generate-api.saga';
-import { GenerateApisEventHandler } from './events/execute-sql-create-db.event';
+import { ExecutedSQLScriptEventHandler } from './events/execute-sql-create-db.event';
+import { HttpModule } from '@nestjs/axios';
+import { SQLTransformerProxy } from './proxy/sql.transformer.proxy';
 
 @Module({
     imports: [
         CqrsModule,
+        HttpModule,
     ],
     controllers: [GeneratorController,],
     providers: [
@@ -22,7 +25,8 @@ import { GenerateApisEventHandler } from './events/execute-sql-create-db.event';
         GeneratorService,
 
         GenerateAPISagas,
-        GenerateApisEventHandler,
+        ExecutedSQLScriptEventHandler,
+        SQLTransformerProxy,
     ],
 })
 export class GeneratorModule { }
