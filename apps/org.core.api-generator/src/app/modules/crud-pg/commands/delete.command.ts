@@ -24,7 +24,6 @@ export class DeleteDataCommandHandler
   private readonly logger = new Logger(GetDataQueryHandler.name);
 
   constructor(
-    @InjectEntityManager() private readonly entityManager: EntityManager,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
     this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();
@@ -42,7 +41,7 @@ export class DeleteDataCommandHandler
     try {
       const { queryString, params } = this.relationalDBQueryBuilder.deleteBy('id', id);
 
-      await this.entityManager.query(queryString, params);
+      // await this.entityManager.query(queryString, params);
     } catch (error) {
       this.logger.error(error);
 

@@ -5,6 +5,8 @@ import { GetTableByAppIdQueryHandler } from "./get-avaiable-table-by-appId.query
 import { GetWorkspaceConnectionQueryHandler } from "./get-workspace-connection.query";
 import { GetWorkspaceByIdQueryHandler } from "./get-workspace.query";
 import { GetSchemaInfoByAppIdQueryHandler } from "./get_schema_info.query";
+import { GetSQLConnectionQueryHandler } from "./get-asserts-sql-connections.query";
+import { GetSQLScriptQueryHandler } from "./get-asserts-sql-script.query";
 
 export const QueryHandlers = [
   GetSchemaInfoByAppIdQueryHandler,
@@ -14,4 +16,11 @@ export const QueryHandlers = [
   GetCreatedDbScriptByAppIdQueryHandler,
   GetApisByAppIdQueryHandler,
   GetTableByAppIdQueryHandler,
+
+  // SQL TO API
 ];
+
+export const SQLToAPIQueryHandlers = [
+  GetSQLConnectionQueryHandler,
+  GetSQLScriptQueryHandler,
+]

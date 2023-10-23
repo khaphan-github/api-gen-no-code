@@ -23,7 +23,7 @@ export class UpdateDataCommandHandler
 
   private readonly logger = new Logger(UpdateDataCommandHandler.name);
   constructor(
-    @InjectEntityManager() private readonly entityManager: EntityManager,
+    // @InjectEntityManager() private readonly entityManager: EntityManager,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
     this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();
@@ -40,8 +40,8 @@ export class UpdateDataCommandHandler
 
     try {
       const { queryString, params } = this.relationalDBQueryBuilder.update('id', id, data);
-      const queryResult = await this.entityManager.query(queryString, params);
-      return queryResult[0];
+      // const queryResult = await this.entityManager.query(queryString, params);
+      // return queryResult[0];
     } catch (error) {
       this.logger.error(error);
 

@@ -5,10 +5,12 @@ import { CommandHandlers } from './commands';
 import { CqrsModule } from '@nestjs/cqrs';
 import NodeCache from 'node-cache';
 import { CrudService } from './services/crud-pg.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
     imports: [
         CqrsModule,
+        TypeOrmModule,
     ],
     controllers: [CrudController,],
     providers: [
@@ -16,7 +18,6 @@ import { CrudService } from './services/crud-pg.service';
         ...CommandHandlers,
         NodeCache,
         CrudService,
-        
     ],
 })
 export class CrudModule { }

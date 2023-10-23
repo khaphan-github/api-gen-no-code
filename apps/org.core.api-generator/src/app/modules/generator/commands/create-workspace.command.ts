@@ -59,7 +59,7 @@ export class CreateWorkspaceCommandHandler
         password: password,
         database: databaseName,
       };
-
+      console.log(dbConfig);
       // TODO: Lưu connection này trên server để query lần sau,
       this.jsonIO.writeJsonFile(this.appCoreDomain.getDefaultWorkspaceId().toString(), dbConfig);
 

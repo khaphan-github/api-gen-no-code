@@ -49,7 +49,7 @@ export class AppCoreDomain {
   }
 
   getDefaultWorkspaceId() {
-    return `user.config.db/workspace.config.json`;
+    return `connection.json`;
   }
 
   extractTableInforFromSQLParser = (parsed: AST | AST[]) => {
@@ -95,4 +95,12 @@ export class AppCoreDomain {
       return returnTableName(parsed as Create);
     }
   }
-}
+
+  getSQLConnectionFileName() {
+    return `connection.json`;
+  }
+
+  getSQLScriptFilename() {
+    return `database.sql`;
+  }
+} 

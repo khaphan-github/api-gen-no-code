@@ -1,6 +1,6 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { ExecuteScriptDto } from '../dto/script.dto';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource, DataSourceOptions, UpdateResult } from 'typeorm';
 import { Logger } from '@nestjs/common';
 import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/app.core.domain.script';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
@@ -23,7 +23,7 @@ export class CantNotExecuteScript extends Error implements ErrorStatusCode {
   statusCode: number;
   constructor(appId: string | number, errorMessage: string) {
     super(`Can not execute script in app id ${appId} because ${errorMessage}`);
-    this.name = CantNotUpdateDBScript.name;
+    this.name = CantNotExecuteScript.name;
     this.statusCode = 608;
   }
 }
@@ -36,6 +36,36 @@ export class NullAttributeError extends Error implements ErrorStatusCode {
     this.statusCode = 609;
   }
 }
+
+
+export class CanNotInitDataSourceConnectionError extends Error implements ErrorStatusCode {
+  statusCode: number;
+  constructor(err: string) {
+    super(`Can not init data source with connection: ${err}`);
+    this.name = CanNotInitDataSourceConnectionError.name;
+    this.statusCode = 610;
+  }
+}
+
+
+export class NotFoundApplicationById extends Error implements ErrorStatusCode {
+  statusCode: number;
+  constructor(id: string | number, err: string) {
+    super(`Not found application by id ${id} because ${err}`);
+    this.name = NotFoundApplicationById.name;
+    this.statusCode = 610;
+  }
+}
+
+export class CanNotExecuteCreateDbByScriptError extends Error implements ErrorStatusCode {
+  statusCode: number;
+  constructor(id: string | number, err: string) {
+    super(`Can not execute generate application by script at app ${id} because ${err}`);
+    this.name = NotFoundApplicationById.name;
+    this.statusCode = 610;
+  }
+}
+
 
 export class ExecuteScriptCommand {
   constructor(
@@ -76,69 +106,86 @@ export class ExecuteScriptCommandHandler
     if (_.isNil(workspaceConnections)) throw new NullAttributeError('workspaceConnections');
 
     // #region init necessary static data
-    const { params, queryString } = this.queryBuilder.getByQuery({
-      conditions: { id: appId.toString() },
-      size: 1,
-    }, ['database_config', 'use_default_db']);
 
     // Docs: https://www.npmjs.com/package/node-sql-parser
     // TODO: Database type:
     const parserOptions: Option = {
       database: 'Postgresql'
     }
-    const createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
-    const renamedParser = this.appCoreDomain.convertTableNameByAppId(appId, createDBSCriptParser);
-
-    const scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
-    const executeScriptTransaction = `BEGIN; ${scriptTableRenamed}; COMMIT;`
 
     // #endregion init necessary static data
     let workspaceTypeormDataSource: DataSource;
+
+    // Create connection'
     try {
-      // #region get application database config using workspace connection;
       workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
+    } catch (error) {
+      return Promise.reject(new CanNotInitDataSourceConnectionError(error));
+    }
 
-      const [appDatabaseConfig, executeUpdateApp] = await Promise.all([
-        workspaceTypeormDataSource.query(queryString, params),
+    let applicationInfo: object[] | unknown;
+    try {
+      const { params, queryString } = this.queryBuilder.getByQuery({
+        conditions: { id: appId.toString() },
+        size: 1,
+      }, ['database_config', 'use_default_db']);
 
-        workspaceTypeormDataSource.createQueryBuilder()
-          .update(APPLICATIONS_TABLE_NAME)
-          .set({
-            [EAppTableColumns.CREATE_DB_SCRIPT]: script.script,
-            [EAppTableColumns.UPDATED_AT]: new Date(),
-            [EAppTableColumns.TABLES_INFO]: JSON.stringify(renamedParser),
-          })
-          .where(`${APPLICATIONS_TABLE_NAME}.id = :id`, { id: appId })
-          .execute()
-      ]);
-      // #endregion get application database config using workspace connection;
+      applicationInfo = await workspaceTypeormDataSource.query(queryString, params);
+    } catch (error) {
+      await workspaceTypeormDataSource.destroy();
+      // Case: Table not found
+      return Promise.reject(new CantNotExecuteScript(appId, error.message));
+    }
 
-      // #region execute script create database from user
-      const { database_config, use_default_db } = appDatabaseConfig[0];
+    if (!applicationInfo[0]) {
+      return Promise.reject(new NotFoundApplicationById(appId, `have no record in table match`));
+    }
 
+    const { database_config, use_default_db } = applicationInfo[0];
+
+    const createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
+    const renamedParser = this.appCoreDomain.convertTableNameByAppId(appId, createDBSCriptParser);
+    const scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
+
+    const executeScriptTransaction = `BEGIN; ${scriptTableRenamed}; COMMIT;`
+
+    let executeGenrateDBResult: unknown;
+    try {
       if (use_default_db) {
         await workspaceTypeormDataSource.query(executeScriptTransaction);
       } else {
         const appTypeOrmDataSource = await new DataSource(database_config).initialize();
-        await appTypeOrmDataSource.query(executeScriptTransaction);
+        executeGenrateDBResult = await appTypeOrmDataSource.query(executeScriptTransaction);
         await appTypeOrmDataSource.destroy();
       }
-      // #endregion execute script create database from user
-
-      // Execute task gennerate api;
-      this.eventBus.publish(
-        new ExecutedSQLScriptEvent(workspaceConnections, ownerId, appId, createDBSCriptParser)
-      );
-
-      return {
-        updateAppResult: executeUpdateApp,
-        executeCreateDBScript: true,
-      };
     } catch (error) {
-      this.logger.error(error.message);
-      throw new CantNotExecuteScript(appId, error.message);
+      return Promise.reject(new CanNotExecuteCreateDbByScriptError(appId, error.message));
+    }
+
+    let executeUpdateAppResult: UpdateResult;
+    try {
+      executeUpdateAppResult = await workspaceTypeormDataSource.createQueryBuilder()
+        .update(APPLICATIONS_TABLE_NAME)
+        .set({
+          [EAppTableColumns.CREATE_DB_SCRIPT]: script.script,
+          [EAppTableColumns.UPDATED_AT]: new Date(),
+          [EAppTableColumns.TABLES_INFO]: JSON.stringify(renamedParser),
+        })
+        .where(`${APPLICATIONS_TABLE_NAME}.id = :id`, { id: appId })
+        .execute();
+    } catch (error) {
+      return Promise.reject(new CantNotUpdateDBScript(appId, error.message));
     } finally {
       await workspaceTypeormDataSource.destroy();
+    }
+
+    this.eventBus.publish(
+      new ExecutedSQLScriptEvent(workspaceConnections, ownerId, appId, createDBSCriptParser)
+    );
+
+    return {
+      executeGenrateDBResult: executeGenrateDBResult,
+      executeUpdateAppResult: executeUpdateAppResult,
     }
   }
 }

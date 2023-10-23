@@ -2,11 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { CrudModule } from './modules/crud-pg/crud.module';
 import { GeneratorModule } from './modules/generator/generator.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AppEnvironmentConfig } from './infrastructure/env/app.env.config';
-import { TypeOrmPostgresConfig } from './infrastructure/postgres.db.config';
 import { JsonIoService } from './modules/shared/json.io.service';
+import { FileReaderService } from './modules/shared/file-reader.service';
 
 const FEATUREMODULES = [
   CrudModule,
@@ -16,21 +15,11 @@ const FEATUREMODULES = [
 @Module({
   imports: [
     ...FEATUREMODULES,
-    ConfigModule.forRoot({
-      load: [AppEnvironmentConfig],
-      isGlobal: true,
-    }),
-
-    // Infrastructure config
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: TypeOrmPostgresConfig,
-    }),
-
+    ConfigModule.forRoot(),
   ],
   providers: [
     JsonIoService,
+    FileReaderService,
   ]
 })
 export class AppModule { }

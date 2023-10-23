@@ -2,8 +2,6 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { Logger } from '@nestjs/common';
-import { EntityManager } from 'typeorm';
-import { InjectEntityManager } from '@nestjs/typeorm';
 
 export class DropSchemaCommand {
   constructor(
@@ -20,7 +18,7 @@ export class DropSchemaCommandHandler
   private readonly logger = new Logger(DropSchemaCommandHandler.name);
 
   constructor(
-    @InjectEntityManager() private readonly entityManager: EntityManager,
+    // @InjectEntityManager() private readonly entityManager: EntityManager,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
     this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();
@@ -32,7 +30,7 @@ export class DropSchemaCommandHandler
 
     try {
       const { queryString } = this.relationalDBQueryBuilder.dropTable();
-      await this.entityManager.query(queryString);
+      // await this.entityManager.query(queryString);
     } catch (error) {
       this.logger.error(error);
       return {

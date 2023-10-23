@@ -95,7 +95,8 @@ export class GeneratorService {
     const commandResult = this.commandBus.execute(
       new RunScriptCommand(workspaceConnection, sugesstionRes.data)
     );
-    
+
     return commandResult;
   }
+
 } 

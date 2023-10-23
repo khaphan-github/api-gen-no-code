@@ -16,8 +16,6 @@ export class WorkspaceConnectionNotFound extends Error implements ErrorStatusCod
     this.statusCode = 604;
   }
 }
-
-
 // #endregion error
 
 export class GetWorkspaceConnectionQuery { }
