@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { AST, Create } from "node-sql-parser";
-import { EGeneratedApisTableColumns } from "./app.core.domain.script";
+import { EGeneratedApisTableColumns } from "./pgsql/app.core.domain.pg-script";
 
 export enum ApiAction {
   INSERT = 'INSERT',

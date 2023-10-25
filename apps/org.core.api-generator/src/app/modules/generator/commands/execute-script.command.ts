@@ -2,7 +2,7 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { DataSource, DataSourceOptions, UpdateResult } from 'typeorm';
 import { Logger } from '@nestjs/common';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/app.core.domain.script';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import _ from 'lodash';
@@ -53,7 +53,7 @@ export class NotFoundApplicationById extends Error implements ErrorStatusCode {
   constructor(id: string | number, err: string) {
     super(`Not found application by id ${id} because ${err}`);
     this.name = NotFoundApplicationById.name;
-    this.statusCode = 610;
+    this.statusCode = 611;
   }
 }
 
@@ -62,7 +62,7 @@ export class CanNotExecuteCreateDbByScriptError extends Error implements ErrorSt
   constructor(id: string | number, err: string) {
     super(`Can not execute generate application by script at app ${id} because ${err}`);
     this.name = CanNotExecuteCreateDbByScriptError.name;
-    this.statusCode = 610;
+    this.statusCode = 612;
   }
 }
 

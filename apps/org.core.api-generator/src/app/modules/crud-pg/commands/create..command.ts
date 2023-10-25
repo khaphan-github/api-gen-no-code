@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { QueryBuilderResult, RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/app.core.domain.script';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
 import { CanNotGetAppInforError } from '../errors/can-not-get-app-info.error';

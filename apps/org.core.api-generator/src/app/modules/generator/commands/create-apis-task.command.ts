@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
-import { GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/app.core.domain.script';
+import { GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { AST } from 'node-sql-parser';
 import { ApisCoreDomain } from '../../../domain/api.core.domain';

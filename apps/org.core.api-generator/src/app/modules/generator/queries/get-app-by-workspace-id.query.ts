@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { Logger } from '@nestjs/common';
 
 export class GetAppsByWorkspaceIdQuery {
@@ -38,7 +38,7 @@ export class GetAppsByWorkspaceIdQueryHandler
     try {
       typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
-      
+
       return queryResult;
     } catch (error) {
       this.logger.error(error);

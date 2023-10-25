@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { EGeneratedApisTableColumns, GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/app.core.domain.script';
+import { EGeneratedApisTableColumns, GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { Logger } from '@nestjs/common';
 
 export class GetApisByAppIdQuery {

@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/app.core.domain.script';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { Logger } from '@nestjs/common';
 
 export class GetCreatedDbScriptByAppIdQuery {
@@ -27,7 +27,7 @@ export class GetCreatedDbScriptByAppIdQueryHandler
   // DONE
   async execute(query: GetCreatedDbScriptByAppIdQuery) {
     const { ownerId, appId, workspaceConnections } = query;
-    
+
     const { queryString, params } = this.queryBuilder.getByQuery(
       {
         conditions: {

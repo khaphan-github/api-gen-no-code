@@ -5,7 +5,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { QueryParamDataDto, RequestParamDataDto } from '../controller/query-filter.dto';
 import { ConditionObject, RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/app.core.domain.script';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { CanNotGetAppInforError } from '../errors/can-not-get-app-info.error';
 import { AppConfigNotFoundError } from '../errors/app-config-not-found.error';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
