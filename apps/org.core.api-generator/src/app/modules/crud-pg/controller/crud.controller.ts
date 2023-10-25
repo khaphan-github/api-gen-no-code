@@ -80,13 +80,13 @@ export class CrudController {
       }]
     }
   })
-  insert(
+  async insert(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
     @Body() data: Array<object>
   ) {
     try {
-      const insertResult = this.service.insert(appId, schema, data);
+      const insertResult = await this.service.insert(appId, schema, data);
       return new ResponseBase(201, 'Insert success', insertResult);
     } catch (error) {
       return new ResponseBase(400, 'Insert failure:', {
