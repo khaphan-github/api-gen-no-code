@@ -5,12 +5,13 @@ import { AppCoreDomain } from '../../../domain/app.core.domain';
 import { JsonIoService } from '../../shared/json.io.service';
 import { CreateApplicationDto } from '../dto/create-app.dto';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../domain/app.core.domain.script';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/app.core.domain.script';
 
 export class CreateApplicationCommand {
   constructor(
     public readonly ownerId: string,
     public readonly CreateApplicationDto: CreateApplicationDto,
+    public readonly appid?: string | number,
   ) { }
 }
 
@@ -42,11 +43,25 @@ export class CreateApplicationCommandHandler
       );
 
       if (workspaceDbConfig) {
+        const typeormDataSource = await new DataSource(workspaceDbConfig).initialize();
+
+        const isExistedAppIdQuery = this.queryBuilder.getByQuery({
+          conditions: {
+            [EAppTableColumns.ID]: command.appid?.toString(),
+          }
+        });
+
+        const isExitedAppResult = await typeormDataSource.query(isExistedAppIdQuery.queryString, isExistedAppIdQuery.params);
+        if (isExitedAppResult[0]) {
+          return isExitedAppResult[0];
+        }
+
         let query = '';
         let queryParams = [];
         const responseColumns = ['id', 'workspace_id', 'app_name', 'enable', 'use_default_db', 'updated_at'];
         if (useDefaultDb) {
           const { queryString, params } = this.queryBuilder.insert({
+            id: command?.appid,
             owner_id: command.ownerId,
             app_name: appName,
             workspace_id: workspaceId,
@@ -68,7 +83,10 @@ export class CreateApplicationCommandHandler
             database: databaseName,
           };
 
+          // Todo: Only create if not exist;
+
           const { queryString, params } = this.queryBuilder.insert({
+            id: command?.appid,
             owner_id: command.ownerId,
             app_name: appName,
             workspace_id: workspaceId,
@@ -80,7 +98,6 @@ export class CreateApplicationCommandHandler
           query = queryString;
           queryParams = params;
         }
-        const typeormDataSource = await new DataSource(workspaceDbConfig).initialize();
 
         const queryResult = await typeormDataSource.query(query, queryParams);
 

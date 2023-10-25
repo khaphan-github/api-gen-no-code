@@ -61,7 +61,7 @@ export class CanNotExecuteCreateDbByScriptError extends Error implements ErrorSt
   statusCode: number;
   constructor(id: string | number, err: string) {
     super(`Can not execute generate application by script at app ${id} because ${err}`);
-    this.name = NotFoundApplicationById.name;
+    this.name = CanNotExecuteCreateDbByScriptError.name;
     this.statusCode = 610;
   }
 }
@@ -142,11 +142,17 @@ export class ExecuteScriptCommandHandler
     }
 
     const { database_config, use_default_db } = applicationInfo[0];
+    let scriptTableRenamed;
+    let renamedParser;
+    let createDBSCriptParser;
 
-    const createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
-    const renamedParser = this.appCoreDomain.convertTableNameByAppId(appId, createDBSCriptParser);
-    const scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
-
+    try {
+      createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
+      renamedParser = this.appCoreDomain.convertTableNameByAppId(appId, createDBSCriptParser);
+      scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
+    } catch (error) {
+      this.logger.error(error);
+    }
     const executeScriptTransaction = `BEGIN; ${scriptTableRenamed}; COMMIT;`
 
     let executeGenrateDBResult: unknown;

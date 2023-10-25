@@ -31,7 +31,9 @@ export class GeneratorService {
   }
 
   createWorkspace(createAppDto: CreateWorkspaceDto) {
-    return this.commandBus.execute(new CreateWorkspaceCommand(createAppDto));
+    const owner_id = '1';
+    return this.commandBus.execute(new CreateWorkspaceCommand(
+      owner_id, createAppDto));
   }
 
   dropSchema(appId: string, schema: string,) {

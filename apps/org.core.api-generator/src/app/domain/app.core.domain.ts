@@ -75,7 +75,7 @@ export class AppCoreDomain {
       });
       return newAst;
     }
-    if (_.isArray(parsed)) {
+    if (parsed && _.isArray(parsed)) {
       return _.map(parsed, (ast: Create) => {
         return findAttribute(ast);
       });

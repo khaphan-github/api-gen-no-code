@@ -20,7 +20,11 @@ export class AppAlreadyExistError extends Error {
 }
 
 export class CreateWorkspaceCommand {
-  constructor(public readonly CreateWorkspaceDto: CreateWorkspaceDto) { }
+  constructor(
+    public readonly ownerId: string,
+    public readonly CreateWorkspaceDto: CreateWorkspaceDto,
+    public readonly workspaceId?: string | number,
+  ) { }
 }
 
 @CommandHandler(CreateWorkspaceCommand)
@@ -59,12 +63,12 @@ export class CreateWorkspaceCommandHandler
         password: password,
         database: databaseName,
       };
-      console.log(dbConfig);
       // TODO: Lưu connection này trên server để query lần sau,
-      this.jsonIO.writeJsonFile(this.appCoreDomain.getDefaultWorkspaceId().toString(), dbConfig);
+      // this.jsonIO.writeJsonFile(this.appCoreDomain.getDefaultWorkspaceId().toString(), dbConfig);
 
       const typeormDataSource = await new DataSource(dbConfig).initialize();
 
+      // Only create if not exist
       const queryInitCoreTable = `
         BEGIN;
           ${this.appCoreDomain.getCreateWorkspaceScript()}
@@ -74,9 +78,27 @@ export class CreateWorkspaceCommandHandler
       `
       await typeormDataSource.query(queryInitCoreTable);
 
+      // Todo: If workspace exist - dont create new;
+      const isExistedWorkspaceQuery = this.queryBuilder.getByQuery({
+        conditions: {
+          [EWorkspaceColumns.ID]: command.workspaceId?.toString(),
+        }
+      });
+
+      const isExitedWorkspaceResult = await typeormDataSource.query(
+        isExistedWorkspaceQuery.queryString,
+        isExistedWorkspaceQuery.params
+      );
+      if (isExitedWorkspaceResult[0]) {
+        typeormDataSource.destroy();
+        return isExitedWorkspaceResult;
+      }
+
+
       const { params, queryString } = this.queryBuilder.insert({
+        [EWorkspaceColumns.ID]: command?.workspaceId,
         [EWorkspaceColumns.DATABASE_CONFIG]: dbConfig,
-        [EWorkspaceColumns.OWNER_ID]: 'test_owner_id',
+        [EWorkspaceColumns.OWNER_ID]: command.ownerId,
         [EWorkspaceColumns.CREATED_AT]: new Date(),
         [EWorkspaceColumns.UPDATED_AT]: new Date(),
       });
