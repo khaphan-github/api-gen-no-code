@@ -61,7 +61,7 @@ Then remember checkout branch **feature/sql-to-api** if you want to use feature 
 # How to Create API from SQL:
 
 Now you can open this project using vscode, then you need to find `assets` folder where store your database connection and sql script:
-![image](https://github.com/khaphan-github/api-gen-no-code/assets/76431966/4a11b73f-3993-43b1-bf9e-8832b6924008)
+path: `/org.api-generator/apps/org.core.api-generator/src/assets`
 
 ### You provice database connection in `connection.json` file:
 ```json
