@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ICommand, Saga, ofType } from "@nestjs/cqrs";
-import { Observable, map, tap } from "rxjs";
+import { Observable, map } from "rxjs";
 import { TaskGenerateAPIsCommand } from "../commands/create-apis-task.command";
 import { ExecutedSQLScriptEvent } from "../events/execute-sql-create-db.event";
 import { ExecutedSQLByUIEvent } from "../events/execute-sql-create-db-UI";

@@ -5,13 +5,12 @@ import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { QueryBuilderResult, RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { InvalidColumnOfTableError } from '../errors/invalid-table-colums.error';
 import { checkObjectsForSameKey } from '../../../lib/utils/check-array-object-match-key';
-import NodeCache from 'node-cache';
 import { ApplicationModel } from '../../../domain/models/code-application.model';
-import { NotFoundApplicationById } from '../../generator/commands/execute-script.command';
 import { EmptyRecordWhenInsertError } from '../errors/empty-record-when-insert.error';
 import { DataToInsertNotHaveSameKeyError } from '../errors/data-insert-not-have-have-key.error';
 import { CanNotInsertNewRecordError } from '../errors/can-not-insert-new-record.errror';
 import { ExecutedSQLQueryEvent } from '../events/executed-query.event';
+import { NotFoundAppByIdError } from '../errors/not-found-app-by-id.error';
 
 export class CreateDataCommand {
   constructor(
@@ -43,7 +42,7 @@ export class CreateDataCommandHandler
     const { appInfo, appId, schema, data, tableInfo } = command;
 
     if (!appInfo) {
-      return Promise.reject(new NotFoundApplicationById(appId, 'CreateDataCommandHandler not found application info'));
+      return Promise.reject(new NotFoundAppByIdError(appId, 'CreateDataCommandHandler not found application info'));
     }
 
     const tableName = this.dbQueryDomain.getTableName(appId, schema);

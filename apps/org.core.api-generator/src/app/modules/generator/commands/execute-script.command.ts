@@ -3,59 +3,13 @@ import { ExecuteScriptDto } from '../dto/script.dto';
 import { DataSource, DataSourceOptions, UpdateResult } from 'typeorm';
 import { Logger } from '@nestjs/common';
 import { APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
-import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import _ from 'lodash';
 import { AST, Option, Parser } from 'node-sql-parser';
 import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { ExecutedSQLScriptEvent } from '../events/execute-sql-create-db.event';
-
-export class CantNotUpdateDBScript extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(appId: string | number, errorMessage: string) {
-    super(`Can not update database script in app id ${appId} because ${errorMessage}`);
-    this.name = CantNotUpdateDBScript.name;
-    this.statusCode = 607;
-  }
-}
-
-
-export class NullAttributeError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(attribute: string) {
-    super(`${attribute} should not be empty`);
-    this.name = CantNotUpdateDBScript.name;
-    this.statusCode = 609;
-  }
-}
-
-
-export class CanNotInitDataSourceConnectionError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(err: string) {
-    super(`Can not init data source with connection: ${err}`);
-    this.name = CanNotInitDataSourceConnectionError.name;
-    this.statusCode = 610;
-  }
-}
-
-
-export class NotFoundApplicationById extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(id: string | number, err: string) {
-    super(`Not found application by id ${id} because ${err}`);
-    this.name = NotFoundApplicationById.name;
-    this.statusCode = 611;
-  }
-}
-
-export class CanNotExecuteCreateDbByScriptError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(id: string | number, err: string) {
-    super(`Can not execute generate application by script at app ${id} because ${err}`);
-    this.name = CanNotExecuteCreateDbByScriptError.name;
-    this.statusCode = 612;
-  }
-}
+import { CanNotUpdateResultError } from '../../crud-pg/errors/can-not-update-result.error';
+import { NullAttributeError } from '../../shared/errors/null-attribute.error';
+import { CanNotExecuteQueryError } from '../../crud-pg/errors/can-not-execute-query.error';
 
 export class ExecuteScriptCommand {
   constructor(
@@ -106,7 +60,7 @@ export class ExecuteScriptCommandHandler
       workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
     } catch (error) {
       await workspaceTypeormDataSource?.destroy();
-      return Promise.reject(new CanNotInitDataSourceConnectionError(error));
+      return Promise.reject(new CanNotExecuteQueryError(appId, '', error.message));
     }
 
     let scriptTableRenamed: string;
@@ -127,7 +81,7 @@ export class ExecuteScriptCommandHandler
       await workspaceTypeormDataSource.query(executeScriptTransaction);
     } catch (error) {
       await workspaceTypeormDataSource?.destroy();
-      return Promise.reject(new CanNotExecuteCreateDbByScriptError(appId, error.message));
+      return Promise.reject(new CanNotExecuteQueryError(appId, '', error.message));
     }
 
     let executeUpdateAppResult: UpdateResult;
@@ -143,7 +97,7 @@ export class ExecuteScriptCommandHandler
         .execute();
     } catch (error) {
       await workspaceTypeormDataSource?.destroy();
-      return Promise.reject(new CantNotUpdateDBScript(appId, error.message));
+      return Promise.reject(new CanNotUpdateResultError(appId, APPLICATIONS_TABLE_NAME, appId, error.message));
     } finally {
       await workspaceTypeormDataSource.destroy();
     }

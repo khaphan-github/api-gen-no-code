@@ -77,47 +77,50 @@ export class ApisCoreDomain {
     const tableName = (_info?.table[0]?.table as string).toLocaleLowerCase() ?? '';
     const apiPath = `/api/v1/app/${appId}/schema/${tableName}`;
 
-    apiRecord[EGeneratedApisTableColumns.APP_ID] = appId;
-    apiRecord[EGeneratedApisTableColumns.TABLE_NAME] = tableName;
-    apiRecord[EGeneratedApisTableColumns.HEADERS] = JSON.stringify({
+    const { ACTION, API_PATH, APP_ID, AUTHENTICATION, CREATED_AT, ENABLE, HEADERS, HTTP_METHOD,
+      REQUEST_BODY, RESPONSE_ATTRIBUTES, TABLE_NAME, UPDATED_AT } = EGeneratedApisTableColumns;
+
+    apiRecord[APP_ID] = appId;
+    apiRecord[TABLE_NAME] = tableName;
+    apiRecord[HEADERS] = JSON.stringify({
       AppClientSecretKey: secretKey
     });
-    apiRecord[EGeneratedApisTableColumns.AUTHENTICATION] = Authenticate.NO_AUTH;
+    apiRecord[AUTHENTICATION] = Authenticate.NO_AUTH;
 
-    apiRecord[EGeneratedApisTableColumns.ENABLE] = true;
-    apiRecord[EGeneratedApisTableColumns.CREATED_AT] = new Date();
-    apiRecord[EGeneratedApisTableColumns.UPDATED_AT] = new Date();
-    apiRecord[EGeneratedApisTableColumns.REQUEST_BODY] = JSON.stringify({});
-    apiRecord[EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES] = JSON.stringify({});
+    apiRecord[ENABLE] = true;
+    apiRecord[CREATED_AT] = new Date();
+    apiRecord[UPDATED_AT] = new Date();
+    apiRecord[REQUEST_BODY] = JSON.stringify({});
+    apiRecord[RESPONSE_ATTRIBUTES] = JSON.stringify({});
 
     switch (typeApi) {
       case RestFulMethod.GET:
-        apiRecord[EGeneratedApisTableColumns.API_PATH] = apiPath;
-        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.GET;
-        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.QUERY;
+        apiRecord[API_PATH] = apiPath;
+        apiRecord[HTTP_METHOD] = RestFulMethod.GET;
+        apiRecord[ACTION] = ApiAction.QUERY;
 
 
         break;
       case RestFulMethod.POST:
-        apiRecord[EGeneratedApisTableColumns.API_PATH] = apiPath;
-        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.POST;
-        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.INSERT;
-        apiRecord[EGeneratedApisTableColumns.REQUEST_BODY] = JSON.stringify([requestBody]);
-        apiRecord[EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES] = JSON.stringify([requestBody]);
+        apiRecord[API_PATH] = apiPath;
+        apiRecord[HTTP_METHOD] = RestFulMethod.POST;
+        apiRecord[ACTION] = ApiAction.INSERT;
+        apiRecord[REQUEST_BODY] = JSON.stringify([requestBody]);
+        apiRecord[RESPONSE_ATTRIBUTES] = JSON.stringify([requestBody]);
 
         break;
       case RestFulMethod.PUT:
-        apiRecord[EGeneratedApisTableColumns.API_PATH] = `${apiPath}/:id`;
-        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.PUT;
-        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.UPDATE;
-        apiRecord[EGeneratedApisTableColumns.REQUEST_BODY] = JSON.stringify([requestBody]);
-        apiRecord[EGeneratedApisTableColumns.RESPONSE_ATTRIBUTES] = JSON.stringify([requestBody]);
+        apiRecord[API_PATH] = `${apiPath}/:id`;
+        apiRecord[HTTP_METHOD] = RestFulMethod.PUT;
+        apiRecord[ACTION] = ApiAction.UPDATE;
+        apiRecord[REQUEST_BODY] = JSON.stringify([requestBody]);
+        apiRecord[RESPONSE_ATTRIBUTES] = JSON.stringify([requestBody]);
 
         break;
       case RestFulMethod.DELETE:
-        apiRecord[EGeneratedApisTableColumns.API_PATH] = `${apiPath}/:id`;
-        apiRecord[EGeneratedApisTableColumns.HTTP_METHOD] = RestFulMethod.DELETE;
-        apiRecord[EGeneratedApisTableColumns.ACTION] = ApiAction.DELETE;
+        apiRecord[API_PATH] = `${apiPath}/:id`;
+        apiRecord[HTTP_METHOD] = RestFulMethod.DELETE;
+        apiRecord[ACTION] = ApiAction.DELETE;
         break;
     }
     return apiRecord;
