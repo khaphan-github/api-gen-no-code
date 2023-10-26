@@ -41,6 +41,12 @@ To get started with the project, you'll need to clone this repository to your lo
   git clone https://github.com/khaphan-github/api-gen-no-code
 ```
 
+Then cd to project
+
+```bash
+  cd api-gen-no-code
+```
+
 Then remember checkout branch **feature/sql-to-api** if you want to use feature **sql-to-api**:
 
 ```bash
@@ -52,6 +58,8 @@ Then remember checkout branch **feature/sql-to-api** if you want to use feature 
 ```
   npm install
 ```
+
+###
 
 # How to Create API from SQL:
 
@@ -194,6 +202,62 @@ axios
 ### POST - Execute complex query:
 
 You can query every thing you want when use this endpoint:
+
+1. Endpoint:
+
+```
+http://localhost:3000/app/9999/schema/products/query
+```
+
+2. Method: [POST]
+
+3. Example request using `axios`(https://axios-http.com/vi/docs/intro):
+
+I recommend use an interface for condition:
+
+```typescript
+export interface ConditionObject {
+  and?: ConditionObject[];
+  or?: ConditionObject[];
+  [key: string]: string | ConditionObject[] | undefined;
+}
+```
+
+```javascript
+import axios from 'axios';
+
+const url = 'http://localhost:3000/app/9999/schema/products/query';
+const params = {
+  selects: ['product_id', 'name'],
+  page: 0,
+  size: 10,
+  orderby: 'product_id',
+  caching: false,
+};
+
+// caching not implemented;
+
+const conditionObject: ConditionObject = {
+  or: [{ category: 'Sample Category' }, { name: 'Sample Product' }],
+};
+
+axios
+  .post(
+    url,
+    {
+      condition: conditionObject,
+    },
+    {
+      params,
+    }
+  )
+  .then((response) => {
+    console.log('Response:', response.data);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+```
 
 ### PUT - Update a record:
 
@@ -432,9 +496,6 @@ You can use error code to handle ui if error when call api:
 | ----- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | 1 | 600 | Server error - error unhandled from server |
 | 2 | 604 | Request wrong syntax - server can't execute this request because reasion in messsage |
-| 3 | 404 | Not Found - The requested resource could not be found on the server. |
-| 4 | 500 | Internal Server Error - A generic error message returned when an unexpected condition was encountered. |
-| 5 | 503 | Service Unavailable - The server is currently unable to handle the request due to temporary overloading or maintenance. |
 
 ### Success code:
 
@@ -442,10 +503,6 @@ You can use error code to handle ui if user do some things success:
 | Index | Status | Description |
 | ----- | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | 1 | 201 | Success status response code indicates that the request has succeeded and has led to the creation of a resource |
-| 2 | 401 | Unauthorized - Authentication failed or user lacks necessary permissions. |
-| 3 | 404 | Not Found - The requested resource could not be found on the server. |
-| 4 | 500 | Internal Server Error - A generic error message returned when an unexpected condition was encountered. |
-| 5 | 503 | Service Unavailable - The server is currently unable to handle the request due to temporary overloading or maintenance. |
 
 # Integrate with Your Existing System
 
