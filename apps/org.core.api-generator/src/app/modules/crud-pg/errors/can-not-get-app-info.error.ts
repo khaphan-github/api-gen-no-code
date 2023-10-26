@@ -5,6 +5,6 @@ export class CanNotGetAppInforError extends Error implements ErrorStatusCode {
   constructor(appId: string | number, errorMessage: string) {
     super(`Can not get informatiion of app id ${appId} because ${errorMessage}`);
     this.name = CanNotGetAppInforError.name;
-    this.statusCode = 603;
+    this.statusCode = 612;
   }
 }

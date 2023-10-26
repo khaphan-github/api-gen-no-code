@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
-import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { JsonIoService } from '../../shared/json.io.service';
 import { CreateApplicationDto } from '../dto/create-app.dto';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 
 export class CreateApplicationCommand {

@@ -3,8 +3,8 @@ import { Logger } from '@nestjs/common';
 import { GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { AST } from 'node-sql-parser';
-import { ApisCoreDomain } from '../../../domain/api.core.domain';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { ApisCoreDomain } from '../../../domain/core/api.core.domain';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 
 export class TaskGenerateAPIsCommand {
   constructor(

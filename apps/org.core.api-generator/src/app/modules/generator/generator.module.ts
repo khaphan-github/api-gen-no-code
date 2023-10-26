@@ -14,6 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SQLToAPIService } from './services/sql-to-api.service';
 import { FileReaderService } from '../shared/file-reader.service';
 import { CrudModule } from '../crud-pg/crud.module';
+import { ExecutedSQLQueryEventHandler } from '../crud-pg/handlers/executed-query.handler';
 
 @Module({
     imports: [
@@ -27,6 +28,8 @@ import { CrudModule } from '../crud-pg/crud.module';
         ...CommandHandlers,
         ...QueryHandlers,
         ...SQLToAPIQueryHandlers,
+
+        ExecutedSQLQueryEventHandler,
         JsonIoService,
         FileReaderService,
 

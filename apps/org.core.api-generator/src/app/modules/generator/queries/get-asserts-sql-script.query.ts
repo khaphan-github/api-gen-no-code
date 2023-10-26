@@ -1,9 +1,8 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import NodeCache from 'node-cache';
-import { ErrorStatusCode } from 'apps/org.core.api-generator/src/app/infrastructure/format/status-code';
-import { AppCoreDomain } from 'apps/org.core.api-generator/src/app/domain/app.core.domain';
-import { JsonIoService } from '../../shared/json.io.service';
 import { FileReaderService } from '../../shared/file-reader.service';
+import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 
 // #region error
 export class SQLScripFileNotFoundError extends Error implements ErrorStatusCode {

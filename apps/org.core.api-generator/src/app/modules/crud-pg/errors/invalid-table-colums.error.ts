@@ -5,6 +5,6 @@ export class InvalidColumnOfTableError extends Error implements ErrorStatusCode 
   constructor(appId: string | number, schema: string, err: string) {
     super(`Table ${schema} of app ${appId} ${err}`);
     this.name = InvalidColumnOfTableError.name;
-    this.statusCode = 604;
+    this.statusCode = 617;
   }
 }

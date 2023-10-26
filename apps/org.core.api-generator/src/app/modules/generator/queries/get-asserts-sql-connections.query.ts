@@ -2,9 +2,9 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { DataSourceOptions } from 'typeorm';
 import _ from 'lodash';
 import NodeCache from 'node-cache';
-import { ErrorStatusCode } from 'apps/org.core.api-generator/src/app/infrastructure/format/status-code';
-import { AppCoreDomain } from 'apps/org.core.api-generator/src/app/domain/app.core.domain';
 import { JsonIoService } from '../../shared/json.io.service';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
+import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 
 // #region error
 export class SQLConnectionNotFoundError extends Error implements ErrorStatusCode {

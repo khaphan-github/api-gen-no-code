@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
 import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { ConditionObject } from '../../../domain/relationaldb.query-builder';
+import { ConditionObject } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { CrudService } from '../services/crud-pg.service';
 import { ErrorBase, ResponseBase } from '../../../infrastructure/format/response.base';
 

@@ -1,20 +1,12 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InvalidColumnOfTableError } from '../errors/invalid-table-colums.error';
-import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { ApplicationModel } from '../../../domain/models/code-application.model';
-
-export class CanNotUpdateResultError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(appId: string | number, schema: string, recordId: string | number, err: string) {
-    super(`Can not update record ${recordId} from ${schema} in ${appId} because ${err}`);
-    this.name = CanNotUpdateResultError.name;
-    this.statusCode = 613;
-  }
-}
+import { CanNotUpdateResultError } from '../errors/can-not-update-result.error';
+import { ExecutedSQLQueryEvent } from '../events/executed-query.event';
 
 export class UpdateDataCommand {
   constructor(
@@ -36,7 +28,9 @@ export class UpdateDataCommandHandler
   private readonly relationalDBQueryBuilder!: RelationalDBQueryBuilder;
 
   private readonly logger = new Logger(UpdateDataCommandHandler.name);
-  constructor() {
+  constructor(
+    private readonly eventBus: EventBus,
+  ) {
     this.dbQueryDomain = new DbQueryDomain();
     this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();
   }
@@ -64,6 +58,8 @@ export class UpdateDataCommandHandler
       workspaceTypeOrmDataSource = await new DataSource(appInfo.database_config).initialize();
       const updateResult = await workspaceTypeOrmDataSource.query(query, queryParam);
       await workspaceTypeOrmDataSource?.destroy();
+      this.eventBus.publish(new ExecutedSQLQueryEvent('UpdateDataCommandHandler', { query, queryParam }, updateResult[0]))
+
       return Promise.resolve(updateResult[0]);
     } catch (error) {
       await workspaceTypeOrmDataSource?.destroy();

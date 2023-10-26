@@ -6,7 +6,7 @@ import { APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import _ from 'lodash';
 import { AST, Option, Parser } from 'node-sql-parser';
-import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { ExecutedSQLScriptEvent } from '../events/execute-sql-create-db.event';
 
 export class CantNotUpdateDBScript extends Error implements ErrorStatusCode {

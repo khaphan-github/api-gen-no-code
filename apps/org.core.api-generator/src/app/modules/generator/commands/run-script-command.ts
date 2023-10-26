@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
-import { AppCoreDomain } from '../../../domain/app.core.domain';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { WORKSPACE_AVAILABLE_COLUMNS, WORKSPACE_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 
 export class AppAlreadyExistError extends Error {

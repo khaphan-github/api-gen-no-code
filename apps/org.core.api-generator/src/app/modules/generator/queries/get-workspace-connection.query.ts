@@ -3,7 +3,7 @@ import { JsonIoService } from '../../shared/json.io.service';
 import { DataSourceOptions } from 'typeorm';
 import _ from 'lodash';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
-import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
 import NodeCache from 'node-cache';
 

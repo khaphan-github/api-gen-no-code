@@ -1,5 +1,5 @@
 import { DataSourceOptions } from "typeorm";
-import { CREATE_APPLICATIONS_TABLE_SCRIPT, CREATE_GENERATED_APIS_TABLE_SCRIPT, CREATE_WORKSPACE_TABLE_SCRIPT } from "./pgsql/app.core.domain.pg-script";
+import { CREATE_APPLICATIONS_TABLE_SCRIPT, CREATE_GENERATED_APIS_TABLE_SCRIPT, CREATE_WORKSPACE_TABLE_SCRIPT } from "./app.core.domain.pg-script";
 import { AST, Create } from "node-sql-parser";
 import _ from "lodash";
 

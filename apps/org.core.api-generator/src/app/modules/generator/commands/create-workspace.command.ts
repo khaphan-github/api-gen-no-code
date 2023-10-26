@@ -2,9 +2,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
-import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { JsonIoService } from '../../shared/json.io.service';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { EWorkspaceColumns, WORKSPACE_AVAILABLE_COLUMNS, WORKSPACE_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 
 export class AppAlreadyExistError extends Error {

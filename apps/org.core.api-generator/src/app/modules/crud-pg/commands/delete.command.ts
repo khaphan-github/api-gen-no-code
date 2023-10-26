@@ -1,21 +1,13 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { GetDataQueryHandler } from '../queries/get-by-conditions.query';
 import { Logger } from '@nestjs/common';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { DataSource } from 'typeorm';
-import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { InvalidColumnOfTableError } from '../errors/invalid-table-colums.error';
 import { ApplicationModel } from '../../../domain/models/code-application.model';
-
-export class CanNotDeleteResultError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(appId: string | number, schema: string, recordId: string | number, err: string) {
-    super(`Can not delete record ${recordId} from ${schema} in ${appId} because ${err}`);
-    this.name = CanNotDeleteResultError.name;
-    this.statusCode = 612;
-  }
-}
+import { CanNotDeleteResultError } from '../errors/can-not-delete-result.error';
+import { ExecutedSQLQueryEvent } from '../events/executed-query.event';
 
 export class DeleteDataCommand {
   constructor(
@@ -38,6 +30,7 @@ export class DeleteDataCommandHandler
   private readonly logger = new Logger(GetDataQueryHandler.name);
 
   constructor(
+    private readonly eventBus: EventBus,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
     this.relationalDBQueryBuilder = new RelationalDBQueryBuilder();
@@ -68,6 +61,8 @@ export class DeleteDataCommandHandler
       const deleteResult = await workspaceTypeOrmDataSource.query(query, queryParam);
 
       await workspaceTypeOrmDataSource?.destroy();
+      this.eventBus.publish(new ExecutedSQLQueryEvent('DeleteDataCommandHandler', { query, queryParam }, deleteResult))
+
       return Promise.resolve(deleteResult[1]);
     } catch (error) {
       await workspaceTypeOrmDataSource?.destroy();

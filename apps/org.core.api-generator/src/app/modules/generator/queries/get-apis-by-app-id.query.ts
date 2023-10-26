@@ -1,11 +1,11 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { EGeneratedApisTableColumns, GENERATED_APIS_AVAILABLE_COLUMNS, GENERATED_APIS_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { Logger } from '@nestjs/common';
 import { DefaultResponseError } from '../../crud-pg/errors/default.error';
 import NodeCache from 'node-cache';
-import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 
 export class GetApisByAppIdQuery {
   constructor(

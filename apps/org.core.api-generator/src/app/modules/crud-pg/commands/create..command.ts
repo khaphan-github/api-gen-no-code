@@ -1,46 +1,17 @@
 import { Logger } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { DataSource } from 'typeorm';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
-import { QueryBuilderResult, RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
-import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
-import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
-import { CanNotGetAppInforError } from '../errors/can-not-get-app-info.error';
-import { AppConfigNotFoundError } from '../errors/app-config-not-found.error';
+import { QueryBuilderResult, RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { InvalidColumnOfTableError } from '../errors/invalid-table-colums.error';
 import { checkObjectsForSameKey } from '../../../lib/utils/check-array-object-match-key';
 import NodeCache from 'node-cache';
-import { AppCoreDomain } from '../../../domain/app.core.domain';
 import { ApplicationModel } from '../../../domain/models/code-application.model';
 import { NotFoundApplicationById } from '../../generator/commands/execute-script.command';
-
-export class DataToInserNotHaveSameKeyError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(appId: string | number, schema: string) {
-    super(`Can not insert new record into ${schema} in ${appId} because data insert not have same key each object`);
-    this.name = EmptyRecordWhenInsertError.name;
-    this.statusCode = 611;
-  }
-}
-
-export class EmptyRecordWhenInsertError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(appId: string | number, schema: string) {
-    super(`Can not insert new record into ${schema} in ${appId} because data to insert empty`);
-    this.name = EmptyRecordWhenInsertError.name;
-    this.statusCode = 612;
-  }
-}
-
-export class CanNotInsertNewRecordError extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(appId: string | number, schema: string, message: string) {
-    super(`Can not insert new record into ${schema} in ${appId} because ${message}`);
-    this.name = CanNotInsertNewRecordError.name;
-    this.statusCode = 614;
-  }
-}
+import { EmptyRecordWhenInsertError } from '../errors/empty-record-when-insert.error';
+import { DataToInsertNotHaveSameKeyError } from '../errors/data-insert-not-have-have-key.error';
+import { CanNotInsertNewRecordError } from '../errors/can-not-insert-new-record.errror';
+import { ExecutedSQLQueryEvent } from '../events/executed-query.event';
 
 export class CreateDataCommand {
   constructor(
@@ -62,14 +33,12 @@ export class CreateDataCommandHandler
   private readonly logger = new Logger(CreateDataCommandHandler.name);
 
   constructor(
-    private readonly nodeCache: NodeCache,
+    private readonly eventBus: EventBus,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
     this.queryBuilderTableInsert = new RelationalDBQueryBuilder();
   }
-  // LOGIC: Lấy thông tin ứng dụng dừa vào workspace connection
-  // NẾu ứng dụng use default connection thì dùng connection đó để truy vấn đến bảng
-  // Sau đso thực thi kết quả của người dùng.
+
   async execute(command: CreateDataCommand) {
     const { appInfo, appId, schema, data, tableInfo } = command;
 
@@ -84,7 +53,7 @@ export class CreateDataCommandHandler
     }
 
     if (!checkObjectsForSameKey(data)) {
-      return Promise.reject(new DataToInserNotHaveSameKeyError(appId, tableName))
+      return Promise.reject(new DataToInsertNotHaveSameKeyError(appId, tableName))
     }
 
     const validColumns = this.dbQueryDomain.getTableColumnNameArray(tableInfo, 'column_name');
@@ -105,12 +74,11 @@ export class CreateDataCommandHandler
       workspaceDataSource = await new DataSource(appInfo.database_config).initialize();
       const queryResult = await workspaceDataSource.query(insertQuery.queryString, insertQuery.params);
       await workspaceDataSource?.destroy();
-
+      this.eventBus.publish(new ExecutedSQLQueryEvent('CreateDataCommandHandler', insertQuery, queryResult))
       return Promise.resolve(queryResult);
     } catch (error) {
       await workspaceDataSource?.destroy();
       return Promise.reject(new CanNotInsertNewRecordError(appId, schema, error.message));
     }
   }
-
 }

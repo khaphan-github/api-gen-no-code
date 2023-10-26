@@ -3,10 +3,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { AvailableDB, DbQueryDomain } from '../../../domain/db.query.domain';
-import { RelationalDBQueryBuilder, TableAttribute } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder, TableAttribute } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { JsonIoService } from '../../shared/json.io.service';
 import NodeCache from 'node-cache';
-import { AppConfigDomain } from '../../../domain/app.core.domain';
+import { AppConfigDomain } from '../../../domain/pgsql/pg.app.core.domain';
 
 export class CreateSchemaCommand {
   @ApiProperty({ example: 'products' })

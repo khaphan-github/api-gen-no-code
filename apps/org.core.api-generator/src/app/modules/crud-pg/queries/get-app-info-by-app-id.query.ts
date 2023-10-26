@@ -1,13 +1,12 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
 import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { CanNotGetAppInforError } from '../errors/can-not-get-app-info.error';
-import { AppCoreDomain } from '../../../domain/app.core.domain';
+import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import NodeCache from 'node-cache';
 import { ApplicationModel } from '../../../domain/models/code-application.model';
-
 
 export class GetAppInfoByAppId {
   constructor(

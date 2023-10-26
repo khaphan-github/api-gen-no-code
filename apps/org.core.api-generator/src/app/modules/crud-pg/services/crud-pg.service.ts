@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { QueryParamDataDto, RequestParamDataDto } from "../controller/query-filter.dto";
-import { ConditionObject } from "../../../domain/relationaldb.query-builder";
+import { ConditionObject } from "../../../domain/pgsql/pg.relationaldb.query-builder";
 import { GetDataQuery } from "../queries/get-by-conditions.query";
 import { DeleteDataCommand } from "../commands/delete.command";
 import { CreateDataCommand } from "../commands/create..command";

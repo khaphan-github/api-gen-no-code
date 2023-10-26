@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { QueryParamDataDto } from '../../crud-pg/controller/query-filter.dto';
 import { JsonIoService } from '../../shared/json.io.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
 import { WORKSPACE_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 
 export class UnDefineError extends Error {
