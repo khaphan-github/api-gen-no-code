@@ -1,8 +1,8 @@
 {
   "type": "postgres",
-  "host": "john.db.elephantsql.com",
+  "host": "",
   "port": "5432",
-  "username": "ntwdedcj",
-  "password": "EGQ9acVRGwG3hjqAhX9koSzN-gUv5B4p",
-  "database": "ntwdedcj"
+  "username": "",
+  "password": "",
+  "database": ""
 }
