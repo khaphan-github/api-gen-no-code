@@ -15,7 +15,6 @@ export class GeneratorController {
     private readonly service: GeneratorService,
   ) { }
 
-
   @Get('app/:appid/schema')
   async getSchemasByAppId(
     @Param('appid') appId: number,

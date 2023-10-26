@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { CanNotExecuteCreateDbByScriptError, ExecuteScriptCommand } from "../commands/execute-script.command";
+import { ExecuteScriptCommand } from "../commands/execute-script.command";
 
 import { GetSQLConnectionQuery } from "../queries/get-asserts-sql-connections.query";
 import { GetSQLScriptQuery } from "../queries/get-asserts-sql-script.query";

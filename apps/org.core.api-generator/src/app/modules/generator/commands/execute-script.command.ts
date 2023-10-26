@@ -2,9 +2,8 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { DataSource, DataSourceOptions, UpdateResult } from 'typeorm';
 import { Logger } from '@nestjs/common';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
+import { APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
-import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import _ from 'lodash';
 import { AST, Option, Parser } from 'node-sql-parser';
 import { AppCoreDomain } from '../../../domain/app.core.domain';
@@ -19,14 +18,6 @@ export class CantNotUpdateDBScript extends Error implements ErrorStatusCode {
   }
 }
 
-export class CantNotExecuteScript extends Error implements ErrorStatusCode {
-  statusCode: number;
-  constructor(appId: string | number, errorMessage: string) {
-    super(`Can not execute script in app id ${appId} because ${errorMessage}`);
-    this.name = CantNotExecuteScript.name;
-    this.statusCode = 608;
-  }
-}
 
 export class NullAttributeError extends Error implements ErrorStatusCode {
   statusCode: number;
@@ -111,7 +102,6 @@ export class ExecuteScriptCommandHandler
     // #endregion init necessary static data
     let workspaceTypeormDataSource: DataSource;
 
-    // Create connection'
     try {
       workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
     } catch (error) {

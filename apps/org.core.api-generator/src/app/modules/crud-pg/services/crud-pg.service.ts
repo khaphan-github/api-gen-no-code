@@ -18,13 +18,11 @@ export class CrudService {
     private readonly queryBus: QueryBus,
   ) { }
 
-  // DONE
   private async getApplicationInfo(appId: string | number): Promise<ApplicationModel> {
     const workspaceConnection = await this.queryBus.execute(new GetWorkspaceConnectionQuery());
     return this.queryBus.execute(new GetAppInfoByAppId(workspaceConnection, appId));
   }
 
-  // DONE
   async insert(appId: string, schema: string, data: Array<object>) {
     const appInfo = await this.getApplicationInfo(appId)
     const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appInfo, appId, schema));
@@ -33,21 +31,18 @@ export class CrudService {
     );
   }
 
-  // DONE
   async update(appId: string, schema: string, id: string, idColumn: string, data: object) {
     const appInfo = await this.getApplicationInfo(appId)
     const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appInfo, appId, schema));
     return this.commandBus.execute(new UpdateDataCommand(appInfo, tableInfo, appId, schema, id, idColumn, data));
   }
 
-  // DONE
   async delete(appId: string, schema: string, id: number, column: string) {
     const appInfo = await this.getApplicationInfo(appId)
     const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appInfo, appId, schema));
     return this.commandBus.execute(new DeleteDataCommand(appInfo, tableInfo, appId, schema, id, column));
   }
 
-  // DONE
   async query(
     requestParamDataDto: RequestParamDataDto,
     queryParamDataDto: QueryParamDataDto,
@@ -61,5 +56,4 @@ export class CrudService {
       new GetDataQuery(appInfo, tableInfo, requestParamDataDto, queryParamDataDto, conditions)
     );
   }
-
 }

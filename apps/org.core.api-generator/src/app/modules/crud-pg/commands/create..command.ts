@@ -57,9 +57,7 @@ export class CreateDataCommandHandler
   implements ICommandHandler<CreateDataCommand>
 {
   private readonly dbQueryDomain!: DbQueryDomain;
-  private readonly queryBuilderTableApp!: RelationalDBQueryBuilder;
   private readonly queryBuilderTableInsert!: RelationalDBQueryBuilder;
-  private readonly appCoreDomain!: AppCoreDomain;
 
   private readonly logger = new Logger(CreateDataCommandHandler.name);
 
@@ -67,11 +65,7 @@ export class CreateDataCommandHandler
     private readonly nodeCache: NodeCache,
   ) {
     this.dbQueryDomain = new DbQueryDomain();
-    this.queryBuilderTableApp = new RelationalDBQueryBuilder(
-      APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS,
-    );
     this.queryBuilderTableInsert = new RelationalDBQueryBuilder();
-    this.appCoreDomain = new AppCoreDomain();
   }
   // LOGIC: Lấy thông tin ứng dụng dừa vào workspace connection
   // NẾu ứng dụng use default connection thì dùng connection đó để truy vấn đến bảng

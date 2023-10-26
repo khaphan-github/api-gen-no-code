@@ -66,6 +66,7 @@ export class DeleteDataCommandHandler
     try {
       workspaceTypeOrmDataSource = await new DataSource(appInfo.database_config).initialize();
       const deleteResult = await workspaceTypeOrmDataSource.query(query, queryParam);
+
       await workspaceTypeOrmDataSource?.destroy();
       return Promise.resolve(deleteResult[1]);
     } catch (error) {
