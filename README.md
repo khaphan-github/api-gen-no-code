@@ -297,9 +297,7 @@ const conditionObject: ConditionObject = {
 axios
   .post(
     url,
-    {
-      condition: conditionObject,
-    },
+    conditionObject,
     {
       params,
     }
