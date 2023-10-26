@@ -98,7 +98,7 @@ CREATE TABLE
 ```
 
 ### Nice! Now run this project
-To run this project you need to make sure that your are in root project - where found `package.json` file:
+To run this project you need to make sure that your are in root project - where found `project.json` file:
 ```
 cd apps/org.core.api-generator
 ```
