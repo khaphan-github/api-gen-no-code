@@ -195,9 +195,124 @@ axios
 
 ### PUT - Update a record:
 
+To update a record in table you could call this endpoint
+
 ### DELETE - Remove a record:
 
+You can delete a record in by this enpoint:
+
+1. Endpoint:
+
+```
+http://localhost:3000/app/9999/schema/products/1?id_column=product_id
+```
+
+**NOTE**: id_column=product_id is primary key column in your table 2. Method: [DELETE]
+
+3. Example request using `axios`(https://axios-http.com/vi/docs/intro):
+
+```javascript
+const axios = require('axios');
+
+const productId = 1; // This is the ID of the product you want to delete
+const url = 'http://localhost:3000/app/9999/schema/products/' + productId + '?id_column=product_id';
+
+axios
+  .delete(url)
+  .then((response) => {
+    console.log('Product deleted successfully');
+  })
+  .catch((error) => {
+    console.error('Error deleting product:', error);
+  });
+```
+
+4. Example response: Delete method will response with http status cod 204 with no content:
+
 ### GET - Get api document:
+
+You can get api document by json in this endpoint:
+
+1. Endpoint:
+
+```
+http://localhost:3000/generator/app/9999/api
+```
+
+2. Method: [GET]
+
+3. Example request using `axios`(https://axios-http.com/vi/docs/intro):
+
+```javascript
+const axios = require('axios');
+const apiUrl = 'http://localhost:3000/generator/app/9999/api';
+
+axios
+  .get(apiUrl)
+  .then((response) => {
+    console.log('Product created successfully:', response.data);
+  })
+  .catch((error) => {
+    console.error('Error creating product:', error);
+  });
+```
+
+4. Example response:
+
+```json
+{
+  "id": "f164e625-529e-42f1-a462-cf62f77018aa",
+  "timestamp": "2023-10-26T07:22:50.258Z",
+  "apiVersion": "2.0",
+  "status": 200,
+  "message": "Get apis by 9999 success",
+  "data": [
+    {
+      "id": 1,
+      "app_id": 9999,
+      "table_name": "products",
+      "action": "INSERT",
+      "api_path": "/api/v1/app/9999/schema/products",
+      "http_method": "POST",
+      "authentication": "NO_AUTH",
+      "api_authorized": null,
+      "headers": {
+        "AppClientSecretKey": "secret_kkey"
+      },
+      "request_params": null,
+      "request_body_type": null,
+      "request_body": [
+        {
+          "name": "your_data",
+          "price": "your_data",
+          "category": "your_data",
+          "created_at": "your_data",
+          "product_id": "your_data",
+          "updated_at": "your_data",
+          "description": "your_data",
+          "stock_quantity": "your_data"
+        }
+      ],
+      "response_attributes": [
+        {
+          "name": "your_data",
+          "price": "your_data",
+          "category": "your_data",
+          "created_at": "your_data",
+          "product_id": "your_data",
+          "updated_at": "your_data",
+          "description": "your_data",
+          "stock_quantity": "your_data"
+        }
+      ],
+      "enable": true,
+      "created_at": "2023-10-25T16:50:02.000Z",
+      "updated_at": "2023-10-25T16:50:02.000Z"
+    }
+    //...//
+  ]
+}
+```
 
 ### How query with relationship;
 
@@ -247,10 +362,10 @@ interface ApiResponse<T> {
 ### Error code:
 
 You can use error code to handle ui if error when call api:
-| Index | Error Status Code | Description |
+| Index | Status | Description |
 | ----- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 1 | 400 | Bad Request - The request cannot be fulfilled due to bad syntax or missing parameters. |
-| 2 | 401 | Unauthorized - Authentication failed or user lacks necessary permissions. |
+| 1 | 600 | Server error - error unhandled from server |
+| 2 | 604 | Request wrong syntax - server can't execute this request because reasion in messsage |
 | 3 | 404 | Not Found - The requested resource could not be found on the server. |
 | 4 | 500 | Internal Server Error - A generic error message returned when an unexpected condition was encountered. |
 | 5 | 503 | Service Unavailable - The server is currently unable to handle the request due to temporary overloading or maintenance. |
@@ -258,7 +373,7 @@ You can use error code to handle ui if error when call api:
 ### Success code:
 
 You can use error code to handle ui if user do some things success:
-| Index | Success Status Code | Description |
+| Index | Status | Description |
 | ----- | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | 1 | 201 | Success status response code indicates that the request has succeeded and has led to the creation of a resource |
 | 2 | 401 | Unauthorized - Authentication failed or user lacks necessary permissions. |

@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { GeneratorService } from '../services/generator.service';
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
-import { ResponseBase } from '../../../infrastructure/format/response.base';
+import { ErrorBase, ResponseBase } from '../../../infrastructure/format/response.base';
 import { QueryParamDataDto } from '../../crud-pg/controller/query-filter.dto';
 import { CreateApplicationDto } from '../dto/create-app.dto';
 import { SQLTransformerDto } from './mll.query.dto';
@@ -81,7 +81,7 @@ export class GeneratorController {
       const apis = await this.service.getApisByAppId(appId, ownerID);
       return new ResponseBase(200, `Get apis by ${appId} success`, apis);
     } catch (error) {
-      return new ResponseBase(601, error.message);
+      return new ErrorBase(error);
     }
   }
 

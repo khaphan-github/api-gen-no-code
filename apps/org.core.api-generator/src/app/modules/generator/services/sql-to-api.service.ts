@@ -77,9 +77,7 @@ export class SQLToAPIService implements OnApplicationBootstrap {
         this.logger.log(`GENNERATE API SUCCESS`);
       }
     } catch (error) {
-      if (error instanceof CanNotExecuteCreateDbByScriptError) {
-        this.logger.log(`Your table and api ready! ^^`);
-      }
+      //
     }
   }
   //#endregion api to sql

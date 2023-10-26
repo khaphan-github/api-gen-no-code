@@ -3,7 +3,7 @@ import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { ConditionObject } from '../../../domain/relationaldb.query-builder';
 import { CrudService } from '../services/crud-pg.service';
-import { ResponseBase } from '../../../infrastructure/format/response.base';
+import { ErrorBase, ResponseBase } from '../../../infrastructure/format/response.base';
 
 @ApiTags('CRUD operator')
 @Controller('app/:appid/schema/:schema')
@@ -58,15 +58,14 @@ export class CrudController {
   async deleteById(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
-    @Param('id') id: number
+    @Param('id') id: number,
+    @Query('id_column') column: string
   ) {
     try {
-      const deleteResult = await this.service.delete(appId, schema, id);
+      const deleteResult = await this.service.delete(appId, schema, id, column);
       return new ResponseBase(204, 'Delete success', deleteResult);
     } catch (error) {
-      return new ResponseBase(400, 'Delete failure:', {
-        errorMessage: error.message
-      });
+      return new ErrorBase(error);
     }
   }
 
@@ -89,27 +88,32 @@ export class CrudController {
       const insertResult = await this.service.insert(appId, schema, data);
       return new ResponseBase(201, 'Insert success', insertResult);
     } catch (error) {
-      return new ResponseBase(400, 'Insert failure:', {
-        errorMessage: error.message
-      });
+      return new ErrorBase(error);
     }
   }
 
   @Put(':id')
   @HttpCode(200)
+  @ApiBody({
+    schema: {
+      example: {
+        product_name: 'Sản phẩm test 1',
+        description: 'Đây là sản phẩm có năng lực thần kỳ'
+      }
+    }
+  })
   async update(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
     @Param('id') id: string,
+    @Query('id_column') idColumn: string,
     @Body() data: object
   ) {
     try {
-      const updateResult = await this.service.update(appId, schema, id, data);
+      const updateResult = await this.service.update(appId, schema, id, idColumn, data);
       return new ResponseBase(200, 'Update success', updateResult);
     } catch (error) {
-      return new ResponseBase(400, 'Update failure:', {
-        errorMessage: error.message
-      });
+      return new ErrorBase(error);
     }
   }
 
@@ -122,9 +126,7 @@ export class CrudController {
       const schemaStructure = await this.service.getSchemaStructure(appId, schema);
       return new ResponseBase(200, 'This is schema structure', schemaStructure);
     } catch (error) {
-      return new ResponseBase(400, 'Get schema structure failure:', {
-        errorMessage: error.message
-      });
+      return new ErrorBase(error);
     }
   }
 }

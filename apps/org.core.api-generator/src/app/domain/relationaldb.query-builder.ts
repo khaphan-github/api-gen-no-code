@@ -114,10 +114,11 @@ export class RelationalDBQueryBuilder {
     ${returningQuery};
    `;
 
-    return {
+    const result: QueryBuilderResult = {
       queryString: queryString,
       params: valueArray
     };
+    return result
   }
 
   // should update by id
@@ -129,6 +130,7 @@ export class RelationalDBQueryBuilder {
 
     const columns = Object.keys(data);
     const values = Object.values(data);
+    this.validateColumns(columns);
 
     const queryParams = columns.map((col, index) => `${col} = $${index + 1}`);
     const attributeUpdateQuery = queryParams.join(', ');
@@ -139,14 +141,14 @@ export class RelationalDBQueryBuilder {
       UPDATE ${this.table}
       SET ${attributeUpdateQuery}
       WHERE ${idColumnName} = $${values.length}
-      RETURNING ${columns.join(', ')}
-      ;
+      RETURNING *;
     `;
 
-    return {
+    const result: QueryBuilderResult = {
       queryString: queryString,
       params: values
-    }
+    };
+    return result
   }
 
   getByQuery = (types?: SelectQueryType, selected?: string[],): QueryBuilderResult => {

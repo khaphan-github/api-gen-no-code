@@ -28,4 +28,11 @@ export class ResponseBase {
   }
 }
 
+export class ErrorBase extends ResponseBase {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(err: any) {
+    super(err?.statusCode ?? 0, err?.message);
+  }
+}
+
 

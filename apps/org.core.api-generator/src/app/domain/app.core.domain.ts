@@ -103,4 +103,12 @@ export class AppCoreDomain {
   getSQLScriptFilename() {
     return `database.sql`;
   }
+
+  getApisCacheByAppId(appId: string) {
+    return `api_list_app_${appId}_cache_key`;
+  }
+
+  getAppInfoCacheKey(appId: string) {
+    return `app_info_${appId}_cache_key`;
+  }
 } 

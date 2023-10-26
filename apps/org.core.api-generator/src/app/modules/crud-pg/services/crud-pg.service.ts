@@ -26,14 +26,20 @@ export class CrudService {
     );
   }
 
-  async update(appId: string, schema: string, id: string, data: object) {
-    const tableInfo = await this.getTableInfo(appId, schema);
-    return this.commandBus.execute(new UpdateDataCommand(appId, schema, id, data, tableInfo));
+  async update(appId: string, schema: string, id: string, idColumn: string, data: object) {
+    const [tableInfo, workspaceConnection] = await Promise.all([
+      this.getTableInfo(appId, schema),
+      this.getWorkspaceConnection(),
+    ]);
+    return this.commandBus.execute(new UpdateDataCommand(workspaceConnection, appId, schema, id, idColumn, data, tableInfo));
   }
 
-  async delete(appId: string, schema: string, id: number) {
-    const tableInfo = await this.getTableInfo(appId, schema);
-    return this.commandBus.execute(new DeleteDataCommand(appId, schema, id, tableInfo));
+  async delete(appId: string, schema: string, id: number, column: string) {
+    const [tableInfo, workspaceConnection] = await Promise.all([
+      this.getTableInfo(appId, schema),
+      this.getWorkspaceConnection(),
+    ]);
+    return this.commandBus.execute(new DeleteDataCommand(workspaceConnection, appId, schema, id, column, tableInfo));
   }
 
   async query(

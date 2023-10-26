@@ -5,6 +5,7 @@ import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-bui
 import { Logger } from '@nestjs/common';
 import NodeCache from 'node-cache';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
+import { DefaultResponseError } from '../errors/default.error';
 
 export class NotFoundAppByIdError extends Error implements ErrorStatusCode {
   statusCode: number;
@@ -67,7 +68,6 @@ export class GetSchemaStructureQueryHandler
     try {
       typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
-      console.log(queryResult)
       if (!queryResult || queryResult?.length == 0) {
         return Promise.reject(new NotFoundAppByIdError(appid, schema));
       }
@@ -76,13 +76,9 @@ export class GetSchemaStructureQueryHandler
 
     } catch (error) {
       this.logger.error(error);
-
-      return {
-        statusCode: 101,
-        message: `Error when get table information! table: ${error}`
-      }
+      return Promise.reject(new DefaultResponseError(error))
     } finally {
-      typeormDataSource.destroy();
+      typeormDataSource?.destroy();
     }
   }
 }

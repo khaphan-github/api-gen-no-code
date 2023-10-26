@@ -5,6 +5,6 @@ export class AppConfigNotFoundError extends Error implements ErrorStatusCode {
   constructor(appId: string | number) {
     super(`Application config in in ${appId} not found`);
     this.name = AppConfigNotFoundError.name;
-    this.statusCode = 605;
+    this.statusCode = 600;
   }
 }
