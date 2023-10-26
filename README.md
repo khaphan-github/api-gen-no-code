@@ -58,13 +58,66 @@ Then remember checkout branch **feature/sql-to-api** if you want to use feature 
 ```
   npm install
 ```
-
-###
-
 # How to Create API from SQL:
 
-# Request / Response Syntax:
+Now you can open this project using vscode, then you need to find `assets` folder where store your database connection and sql script:
+![image](https://github.com/khaphan-github/api-gen-no-code/assets/76431966/4a11b73f-3993-43b1-bf9e-8832b6924008)
 
+### You provice database connection in `connection.json` file:
+```json
+{
+  "type": "postgres",
+  "host": "",
+  "port": "5432",
+  "username": "",
+  "password": "",
+  "database": ""
+}
+```
+- `type` must be "postgres" because this source code only support postgresql
+- `host` you can insert your hostname (ex: localhost) or use any cloud db provide postgresql service
+- `port` by default postgresql using port `5432`
+- `username` username to connect to this database
+- `password` password to connect to this database 
+- `database` this is database name by default postgresql provide database name `public`
+
+### Now you insert your sql script to create database to `database.sql` file:
+```sql
+-- Example with create product table in postgresql
+CREATE TABLE
+    products (
+        product_id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        description TEXT,
+        category VARCHAR(50),
+        stock_quantity INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+```
+
+### Nice! Now run this project
+To run this project you need to make sure that your are in root project - where found `package.json` file:
+```
+cd apps/org.core.api-generator
+```
+![image](https://github.com/khaphan-github/api-gen-no-code/assets/76431966/c4c7615a-19fd-4af8-8601-caa1c43f02fc)
+
+Now run project you run this command:
+```bash
+npx nx serve
+```
+If every things work right, you will see your terminal like this:
+![image](https://github.com/khaphan-github/api-gen-no-code/assets/76431966/415c366c-b199-46d7-9381-153fe83818db)
+
+### Now you check your database:
+
+If you found 3 `_code...` table and your table - every thing worked.
+
+![image](https://github.com/khaphan-github/api-gen-no-code/assets/76431966/439b30d9-0b63-4fc4-94e6-266417dbcb75)
+
+# Request / Response Syntax:
 ## Request:
 
 In this project I use RESTFull APIs, RESTful (Representational State Transfer) APIs are a type of web service that adhere to a set of architectural principles. They are designed to enable communication between different software systems over the internet.
