@@ -7,6 +7,7 @@ import { GetSQLScriptQuery } from "../queries/get-asserts-sql-script.query";
 import { CreateWorkspaceCommand } from "../commands/create-workspace.command";
 import { CreateApplicationCommand } from "../commands/create-app.command";
 import { WORKSPACE_VARIABLE } from "../../shared/variables/workspace.variable";
+import { CrudService } from "../../crud-pg/services/crud-pg.service";
 
 @Injectable()
 export class SQLToAPIService implements OnApplicationBootstrap {
@@ -14,6 +15,7 @@ export class SQLToAPIService implements OnApplicationBootstrap {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly crudService: CrudService,
   ) { }
 
   onApplicationBootstrap() {

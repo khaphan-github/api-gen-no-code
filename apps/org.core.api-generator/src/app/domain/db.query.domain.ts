@@ -10,8 +10,8 @@ export class DbQueryDomain {
     return `app_${appId}_${tableName}`
   }
 
-  getCachingTableInfo = (tableName: string) => {
-    return `table_info_cache_${tableName}`;
+  getCachingTableInfo = (app_id: string, tableName: string) => {
+    return `table_info_cache_app_${app_id}_table_${tableName}`;
   }
 
   getCahingAppConfig = (appId: string | number) => {
@@ -26,6 +26,6 @@ export class DbQueryDomain {
     return `user.config.db/app_${appId}.config.json`;
   }
 
-  
+
 
 }

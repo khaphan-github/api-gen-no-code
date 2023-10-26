@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { CreateWorkspaceDto } from "../dto/create-workspace.dto";
 import { CreateWorkspaceCommand } from "../commands/create-workspace.command";
-import { DropSchemaCommand } from "../commands/drop-schema.command";
 import { ExecuteScriptDto } from "../dto/script.dto";
 import { ExecuteScriptCommand } from "../commands/execute-script.command";
 import { QueryParamDataDto } from "../../crud-pg/controller/query-filter.dto";
@@ -34,10 +33,6 @@ export class GeneratorService {
     const owner_id = '1';
     return this.commandBus.execute(new CreateWorkspaceCommand(
       owner_id, createAppDto));
-  }
-
-  dropSchema(appId: string, schema: string,) {
-    return this.commandBus.execute(new DropSchemaCommand(appId, schema));
   }
 
   executeCreateDatabaseScript = async (appId: number, ownerId: string, scripts: ExecuteScriptDto) => {

@@ -53,7 +53,7 @@ export class CreateWorkspaceCommandHandler
    */
   async execute(command: CreateWorkspaceCommand) {
     const { database, databaseName, host, password, port, username } = command.CreateWorkspaceDto;
-
+    let typeormDataSource: DataSource;
     try {
       const dbConfig: DataSourceOptions = {
         type: database,
@@ -63,10 +63,8 @@ export class CreateWorkspaceCommandHandler
         password: password,
         database: databaseName,
       };
-      // TODO: Lưu connection này trên server để query lần sau,
-      // this.jsonIO.writeJsonFile(this.appCoreDomain.getDefaultWorkspaceId().toString(), dbConfig);
 
-      const typeormDataSource = await new DataSource(dbConfig).initialize();
+      typeormDataSource = await new DataSource(dbConfig).initialize();
 
       // Only create if not exist
       const queryInitCoreTable = `
@@ -104,10 +102,11 @@ export class CreateWorkspaceCommandHandler
       });
 
       const queryResult = await typeormDataSource.query(queryString, params);
-      typeormDataSource.destroy();
-      return queryResult;
+      await typeormDataSource?.destroy();
+      return Promise.resolve(queryResult);
     } catch (error) {
       this.logger.error(error);
+      await typeormDataSource?.destroy();
       return error;
     }
   }

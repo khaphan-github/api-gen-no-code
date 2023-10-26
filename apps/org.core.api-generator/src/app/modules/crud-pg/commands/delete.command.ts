@@ -3,9 +3,10 @@ import { DbQueryDomain } from '../../../domain/db.query.domain';
 import { GetDataQueryHandler } from '../queries/get-by-conditions.query';
 import { Logger } from '@nestjs/common';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { InvalidColumnOfTableError } from '../errors/invalid-table-colums.error';
+import { ApplicationModel } from '../../../domain/models/code-application.model';
 
 export class CanNotDeleteResultError extends Error implements ErrorStatusCode {
   statusCode: number;
@@ -16,15 +17,15 @@ export class CanNotDeleteResultError extends Error implements ErrorStatusCode {
   }
 }
 
-
 export class DeleteDataCommand {
   constructor(
-    public readonly workspaceConnection: DataSourceOptions,
+    public readonly appInfo: ApplicationModel,
+    public readonly tableInfo: object[],
+
     public readonly appid: string,
     public readonly schema: string,
     public readonly id: number,
     public readonly column: string, // <--- id column
-    public readonly tableInfo: object[],
   ) { }
 }
 @CommandHandler(DeleteDataCommand)
@@ -43,7 +44,7 @@ export class DeleteDataCommandHandler
   }
 
   async execute(command: DeleteDataCommand) {
-    const { appid, id, schema, tableInfo, column, workspaceConnection } = command;
+    const { appid, id, schema, tableInfo, column, appInfo } = command;
     const tableName = this.dbQueryDomain.getTableName(appid, schema);
 
     const validColumns = this.dbQueryDomain.getTableColumnNameArray(tableInfo, 'column_name');
@@ -61,13 +62,14 @@ export class DeleteDataCommandHandler
     } catch (error) {
       return Promise.reject(new InvalidColumnOfTableError(appid, schema, error.message));
     }
-
+    let workspaceTypeOrmDataSource: DataSource;
     try {
-      const workspaceTypeOrmDataSource = await new DataSource(workspaceConnection).initialize();
+      workspaceTypeOrmDataSource = await new DataSource(appInfo.database_config).initialize();
       const deleteResult = await workspaceTypeOrmDataSource.query(query, queryParam);
-
+      await workspaceTypeOrmDataSource?.destroy();
       return Promise.resolve(deleteResult[1]);
     } catch (error) {
+      await workspaceTypeOrmDataSource?.destroy();
       this.logger.error(error);
       return Promise.reject(new CanNotDeleteResultError(appid, schema, id, error.message));
     }

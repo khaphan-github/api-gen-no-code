@@ -47,9 +47,7 @@ export class CrudController {
       const queryResult = await this.service.query(requestParamDataDto, queryParamDataDto, conditions);
       return new ResponseBase(200, 'Query success', queryResult);
     } catch (error) {
-      return new ResponseBase(400, 'Query failure because:', {
-        errorMessage: error.message
-      });
+      return new ErrorBase(error);
     }
   }
 
@@ -112,19 +110,6 @@ export class CrudController {
     try {
       const updateResult = await this.service.update(appId, schema, id, idColumn, data);
       return new ResponseBase(200, 'Update success', updateResult);
-    } catch (error) {
-      return new ErrorBase(error);
-    }
-  }
-
-  @Get('structure')
-  async getSchemaInfo(
-    @Param('appid') appId: string,
-    @Param('schema') schema: string
-  ) {
-    try {
-      const schemaStructure = await this.service.getSchemaStructure(appId, schema);
-      return new ResponseBase(200, 'This is schema structure', schemaStructure);
     } catch (error) {
       return new ErrorBase(error);
     }

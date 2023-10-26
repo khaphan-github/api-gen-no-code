@@ -43,7 +43,7 @@ export class GetAppsByWorkspaceIdQueryHandler
     } catch (error) {
       this.logger.error(error);
     } finally {
-      typeormDataSource.destroy();
+      await typeormDataSource.destroy();
     }
   }
 }

@@ -193,9 +193,75 @@ axios
 
 ### POST - Execute complex query:
 
+You can query every thing you want when use this endpoint:
+
 ### PUT - Update a record:
 
-To update a record in table you could call this endpoint
+To update a record in table you could call this endpoint:
+
+1. Endpoint:
+
+```
+http://localhost:3000/app/9999/schema/products/1?id_column=product_id
+```
+
+**NOTE**: id_column=product_id is primary key column in your table
+
+2. Method: [PUT]
+
+3. Example request using `axios`(https://axios-http.com/vi/docs/intro):
+4. Request body:
+
+```json
+{
+  "product_name": " Update product name",
+  "description": "Update product desc"
+}
+```
+
+```javascript
+const axios = require('axios');
+
+const url = 'http://localhost:3000/app/9999/schema/products/4?id_column=product_id';
+
+const data = {
+  product_name: 'Update product name',
+  description: 'Update product desc',
+};
+
+axios
+  .put(url, data, { headers })
+  .then((response) => {
+    console.log('Product updated successfully');
+  })
+  .catch((error) => {
+    console.error('Error updating product:', error);
+  });
+```
+
+5. Example response:
+
+```json
+{
+  "id": "30b40a21-c296-4d2b-94fd-02892975b080",
+  "timestamp": "2023-10-26T08:58:59.283Z",
+  "apiVersion": "2.0",
+  "status": 200,
+  "message": "Update success",
+  "data": [
+    {
+      "product_id": 1,
+      "name": "Update product name", // <-- Updated value
+      "price": "19.99",
+      "description": "Update product desc", // <-- Updated value
+      "category": "Sample Category",
+      "stock_quantity": 100,
+      "created_at": "2023-10-25T15:59:05.220Z",
+      "updated_at": "2023-10-25T15:59:05.220Z"
+    }
+  ]
+}
+```
 
 ### DELETE - Remove a record:
 

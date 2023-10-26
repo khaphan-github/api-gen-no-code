@@ -1,11 +1,12 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { DbQueryDomain } from '../../../domain/db.query.domain';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import { Logger } from '@nestjs/common';
 import NodeCache from 'node-cache';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { DefaultResponseError } from '../errors/default.error';
+import { ApplicationModel } from '../../../domain/models/code-application.model';
 
 export class NotFoundAppByIdError extends Error implements ErrorStatusCode {
   statusCode: number;
@@ -18,7 +19,7 @@ export class NotFoundAppByIdError extends Error implements ErrorStatusCode {
 
 export class GetSchemaStructureQuery {
   constructor(
-    public readonly workspaceConnections: DataSourceOptions,
+    public readonly appInfo: ApplicationModel,
     public readonly appid: string,
     public readonly schema: string,
   ) { }
@@ -47,12 +48,12 @@ export class GetSchemaStructureQueryHandler
   }
 
   async execute(query: GetSchemaStructureQuery): Promise<unknown> {
-    const { workspaceConnections, appid, schema } = query;
+    const { appInfo, appid, schema } = query;
 
     const tableName = this.dbQueryDomain.getTableName(appid, schema).replace('public.', '');
 
     // Cahing
-    const cacheKey = this.dbQueryDomain.getCachingTableInfo(tableName);
+    const cacheKey = this.dbQueryDomain.getCachingTableInfo(appid, tableName);
     const tableInfoFromCache = this.nodeCache.get(cacheKey);
 
     if (tableInfoFromCache) {
@@ -66,19 +67,18 @@ export class GetSchemaStructureQueryHandler
     let typeormDataSource: DataSource;
 
     try {
-      typeormDataSource = await new DataSource(workspaceConnections).initialize();
+      typeormDataSource = await new DataSource(appInfo.database_config).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
       if (!queryResult || queryResult?.length == 0) {
         return Promise.reject(new NotFoundAppByIdError(appid, schema));
       }
       this.nodeCache.set(cacheKey, queryResult);
-      return queryResult;
-
+      await typeormDataSource?.destroy();
+      return Promise.resolve(queryResult);
     } catch (error) {
+      await typeormDataSource?.destroy();
       this.logger.error(error);
       return Promise.reject(new DefaultResponseError(error))
-    } finally {
-      typeormDataSource?.destroy();
     }
   }
 }

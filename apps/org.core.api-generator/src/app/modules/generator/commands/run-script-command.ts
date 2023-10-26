@@ -56,10 +56,11 @@ export class RunScriptCommandHandler
       const queryResult = await typeormDataSource.query(script);
       return queryResult;
     } catch (error) {
+      await typeormDataSource.destroy();
       this.logger.error(error);
       return error;
     } finally {
-      typeormDataSource.destroy();
+      await typeormDataSource.destroy();
     }
   }
 }

@@ -15,14 +15,6 @@ export class GeneratorController {
     private readonly service: GeneratorService,
   ) { }
 
-  @Delete('app/:appid/schema/:schema')
-  @HttpCode(204)
-  async dropTable(
-    @Param('appid') appId: string,
-    @Param('schema') schema: string,
-  ) {
-    return new ResponseBase(200, 'Delete schema successs', await this.service.dropSchema(appId, schema));
-  }
 
   @Get('app/:appid/schema')
   async getSchemasByAppId(

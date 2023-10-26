@@ -8,6 +8,8 @@ import { CreateDataCommand } from "../commands/create..command";
 import { UpdateDataCommand } from "../commands/update.command";
 import { GetSchemaStructureQuery } from "../queries/get-schema-structure.query";
 import { GetWorkspaceConnectionQuery } from "../../generator/queries/get-workspace-connection.query";
+import { GetAppInfoByAppId } from "../queries/get-app-info-by-app-id.query";
+import { ApplicationModel } from "../../../domain/models/code-application.model";
 
 @Injectable()
 export class CrudService {
@@ -16,59 +18,48 @@ export class CrudService {
     private readonly queryBus: QueryBus,
   ) { }
 
+  // DONE
+  private async getApplicationInfo(appId: string | number): Promise<ApplicationModel> {
+    const workspaceConnection = await this.queryBus.execute(new GetWorkspaceConnectionQuery());
+    return this.queryBus.execute(new GetAppInfoByAppId(workspaceConnection, appId));
+  }
+
+  // DONE
   async insert(appId: string, schema: string, data: Array<object>) {
-    const [tableInfo, workspaceConnection] = await Promise.all([
-      this.getTableInfo(appId, schema),
-      this.getWorkspaceConnection(),
-    ]);
+    const appInfo = await this.getApplicationInfo(appId)
+    const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appInfo, appId, schema));
     return this.commandBus.execute(
-      new CreateDataCommand(workspaceConnection, appId, schema, data, tableInfo)
+      new CreateDataCommand(appInfo, tableInfo, appId, schema, data)
     );
   }
 
+  // DONE
   async update(appId: string, schema: string, id: string, idColumn: string, data: object) {
-    const [tableInfo, workspaceConnection] = await Promise.all([
-      this.getTableInfo(appId, schema),
-      this.getWorkspaceConnection(),
-    ]);
-    return this.commandBus.execute(new UpdateDataCommand(workspaceConnection, appId, schema, id, idColumn, data, tableInfo));
+    const appInfo = await this.getApplicationInfo(appId)
+    const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appInfo, appId, schema));
+    return this.commandBus.execute(new UpdateDataCommand(appInfo, tableInfo, appId, schema, id, idColumn, data));
   }
 
+  // DONE
   async delete(appId: string, schema: string, id: number, column: string) {
-    const [tableInfo, workspaceConnection] = await Promise.all([
-      this.getTableInfo(appId, schema),
-      this.getWorkspaceConnection(),
-    ]);
-    return this.commandBus.execute(new DeleteDataCommand(workspaceConnection, appId, schema, id, column, tableInfo));
+    const appInfo = await this.getApplicationInfo(appId)
+    const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appInfo, appId, schema));
+    return this.commandBus.execute(new DeleteDataCommand(appInfo, tableInfo, appId, schema, id, column));
   }
 
+  // DONE
   async query(
     requestParamDataDto: RequestParamDataDto,
     queryParamDataDto: QueryParamDataDto,
     conditions: ConditionObject,
   ) {
-    // TODO: Handle validator ownerId;
     const { appid, schema } = requestParamDataDto;
-    const [tableInfo, workspaceConnection] = await Promise.all([
-      this.getTableInfo(appid, schema),
-      this.getWorkspaceConnection(),
-    ]);
+    const appInfo = await this.getApplicationInfo(appid)
+    const tableInfo = await this.queryBus.execute(new GetSchemaStructureQuery(appInfo, appid, schema));
+
     return this.queryBus.execute(
-      new GetDataQuery(workspaceConnection, requestParamDataDto, queryParamDataDto, conditions, tableInfo)
+      new GetDataQuery(appInfo, tableInfo, requestParamDataDto, queryParamDataDto, conditions)
     );
   }
 
-  async getSchemaStructure(appId: string, schema: string) {
-    const workspaceConnection = await this.getWorkspaceConnection();
-    return this.queryBus.execute(new GetSchemaStructureQuery(workspaceConnection, appId, schema));
-  }
-
-  private getTableInfo = async (appId: string, schema: string,) => {
-    const workspaceConnection = await this.getWorkspaceConnection();
-    return this.queryBus.execute(new GetSchemaStructureQuery(workspaceConnection, appId, schema));
-  }
-
-  private getWorkspaceConnection() {
-    return this.queryBus.execute(new GetWorkspaceConnectionQuery());
-  }
 }

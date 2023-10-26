@@ -19,5 +19,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         NodeCache,
         CrudService,
     ],
+    exports: [
+        CrudService,
+    ]
 })
 export class CrudModule { }

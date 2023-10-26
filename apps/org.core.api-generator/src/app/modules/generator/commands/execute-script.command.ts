@@ -6,7 +6,7 @@ import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTable
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { RelationalDBQueryBuilder } from '../../../domain/relationaldb.query-builder';
 import _ from 'lodash';
-import { Option, Parser } from 'node-sql-parser';
+import { AST, Option, Parser } from 'node-sql-parser';
 import { AppCoreDomain } from '../../../domain/app.core.domain';
 import { ExecutedSQLScriptEvent } from '../events/execute-sql-create-db.event';
 
@@ -66,7 +66,6 @@ export class CanNotExecuteCreateDbByScriptError extends Error implements ErrorSt
   }
 }
 
-
 export class ExecuteScriptCommand {
   constructor(
     public readonly workspaceConnections: DataSourceOptions,
@@ -79,7 +78,6 @@ export class ExecuteScriptCommand {
 @CommandHandler(ExecuteScriptCommand)
 export class ExecuteScriptCommandHandler
   implements ICommandHandler<ExecuteScriptCommand> {
-  private readonly queryBuilder!: RelationalDBQueryBuilder;
   private readonly appCoreDomain!: AppCoreDomain;
   private readonly queryParser!: Parser;
 
@@ -88,9 +86,6 @@ export class ExecuteScriptCommandHandler
   constructor(
     private readonly eventBus: EventBus,
   ) {
-    this.queryBuilder = new RelationalDBQueryBuilder(
-      APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS
-    );
     this.appCoreDomain = new AppCoreDomain();
     this.queryParser = new Parser();
 
@@ -120,31 +115,13 @@ export class ExecuteScriptCommandHandler
     try {
       workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
     } catch (error) {
+      await workspaceTypeormDataSource?.destroy();
       return Promise.reject(new CanNotInitDataSourceConnectionError(error));
     }
 
-    let applicationInfo: object[] | unknown;
-    try {
-      const { params, queryString } = this.queryBuilder.getByQuery({
-        conditions: { id: appId.toString() },
-        size: 1,
-      }, ['database_config', 'use_default_db']);
-
-      applicationInfo = await workspaceTypeormDataSource.query(queryString, params);
-    } catch (error) {
-      await workspaceTypeormDataSource.destroy();
-      // Case: Table not found
-      return Promise.reject(new CantNotExecuteScript(appId, error.message));
-    }
-
-    if (!applicationInfo[0]) {
-      return Promise.reject(new NotFoundApplicationById(appId, `have no record in table match`));
-    }
-
-    const { database_config, use_default_db } = applicationInfo[0];
-    let scriptTableRenamed;
-    let renamedParser;
-    let createDBSCriptParser;
+    let scriptTableRenamed: string;
+    let renamedParser: AST | AST[];
+    let createDBSCriptParser: AST | AST[];
 
     try {
       createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
@@ -157,14 +134,9 @@ export class ExecuteScriptCommandHandler
 
     let executeGenrateDBResult: unknown;
     try {
-      if (use_default_db) {
-        await workspaceTypeormDataSource.query(executeScriptTransaction);
-      } else {
-        const appTypeOrmDataSource = await new DataSource(database_config).initialize();
-        executeGenrateDBResult = await appTypeOrmDataSource.query(executeScriptTransaction);
-        await appTypeOrmDataSource.destroy();
-      }
+      await workspaceTypeormDataSource.query(executeScriptTransaction);
     } catch (error) {
+      await workspaceTypeormDataSource?.destroy();
       return Promise.reject(new CanNotExecuteCreateDbByScriptError(appId, error.message));
     }
 
@@ -180,6 +152,7 @@ export class ExecuteScriptCommandHandler
         .where(`${APPLICATIONS_TABLE_NAME}.id = :id`, { id: appId })
         .execute();
     } catch (error) {
+      await workspaceTypeormDataSource?.destroy();
       return Promise.reject(new CantNotUpdateDBScript(appId, error.message));
     } finally {
       await workspaceTypeormDataSource.destroy();
