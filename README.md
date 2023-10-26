@@ -545,7 +545,7 @@ interface ApiResponse<T> {
 You can use error code to handle ui if error when call api:
 | Index | Status | Description |
 | ----- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 1 | 600 | Server error - error unhandled from server |
+| 1 | 600 | DefaultResponseError - Server error|
 | 2 | 610 | CanNotDeleteResultError |
 | 3 | 611 | CanNotExecuteQueryError
 | 4 | 612 | CanNotGetAppInforError |
@@ -562,7 +562,9 @@ You can use error code to handle ui if error when call api:
 You can use error code to handle ui if user do some things success:
 | Index | Status | Description |
 | ----- | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 1 | 201 | Success status response code indicates that the request has succeeded and has led to the creation of a resource |
+| 1 | 200 | Success status response code indicates that the request has succeeded when get or update data |
+| 2 | 201 | Success status response code indicates that the request has succeeded and has led to the creation of a resource |
+| 3 | 204 | Success status response code indicates that the request has succeeded when deleted data|
 
 # Integrate with Your Existing System
 
