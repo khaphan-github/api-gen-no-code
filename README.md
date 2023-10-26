@@ -546,7 +546,16 @@ You can use error code to handle ui if error when call api:
 | Index | Status | Description |
 | ----- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | 1 | 600 | Server error - error unhandled from server |
-| 2 | 604 | Request wrong syntax - server can't execute this request because reasion in messsage |
+| 2 | 610 | CanNotDeleteResultError |
+| 3 | 611 | CanNotExecuteQueryError
+| 4 | 612 | CanNotGetAppInforError |
+| 5 | 613 | CanNotInsertNewRecordError |
+| 6 | 614 | CanNotUpdateResultError |
+| 7 | 615 | DataToInsertNotHaveSameKeyError |
+| 8 | 616 | EmptyRecordWhenInsertError |
+| 9 | 617 | InvalidColumnOfTableError |
+| 10 | 618 | NotFoundAppByIdError |
+
 
 ### Success code:
 
