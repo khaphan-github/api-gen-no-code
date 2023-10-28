@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { QueryParamDataDto, RequestParamDataDto } from "../controller/query-filter.dto";
-import { ConditionObject } from "../../../domain/pgsql/pg.relationaldb.query-builder";
+import { ConditionObject } from "../../../core/pgsql/pg.relationaldb.query-builder";
 import { GetDataQuery } from "../queries/get-by-conditions.query";
 import { DeleteDataCommand } from "../commands/delete.command";
 import { CreateDataCommand } from "../commands/create..command";
@@ -9,7 +9,7 @@ import { UpdateDataCommand } from "../commands/update.command";
 import { GetSchemaStructureQuery } from "../queries/get-schema-structure.query";
 import { GetWorkspaceConnectionQuery } from "../../generator/queries/get-workspace-connection.query";
 import { GetAppInfoByAppId } from "../queries/get-app-info-by-app-id.query";
-import { ApplicationModel } from "../../../domain/models/code-application.model";
+import { ApplicationModel } from "../../../core/models/application.model";
 
 @Injectable()
 export class CrudService {

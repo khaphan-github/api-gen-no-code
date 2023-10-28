@@ -1,8 +1,8 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { Logger } from '@nestjs/common';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../core/variables/application-table.variables';
 
 export class GetAppsByWorkspaceIdQuery {
   constructor(

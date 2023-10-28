@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { JsonIoService } from '../../shared/json.io.service';
 import { CreateApplicationDto } from '../dto/create-app.dto';
-import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
+import { RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
+import { EAppTableColumns } from '../../../core/models/application.model';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../core/variables/application-table.variables';
 
 export class CreateApplicationCommand {
   constructor(
@@ -19,7 +19,6 @@ export class CreateApplicationCommand {
 export class CreateApplicationCommandHandler
   implements ICommandHandler<CreateApplicationCommand>
 {
-  private readonly appCoreDomain!: AppCoreDomain;
   private readonly queryBuilder!: RelationalDBQueryBuilder;
 
   private readonly logger = new Logger(CreateApplicationCommandHandler.name);
@@ -27,7 +26,6 @@ export class CreateApplicationCommandHandler
   constructor(
     private readonly jsonIO: JsonIoService,
   ) {
-    this.appCoreDomain = new AppCoreDomain();
     this.queryBuilder = new RelationalDBQueryBuilder(APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS);
 
   }
@@ -38,9 +36,7 @@ export class CreateApplicationCommandHandler
 
     try {
       // Get config workspace datbase
-      const workspaceDbConfig = this.jsonIO.readJsonFile<DataSourceOptions>(
-        this.appCoreDomain.getDefaultWorkspaceId().toString()
-      );
+      const workspaceDbConfig = this.jsonIO.readJsonFile<DataSourceOptions>(`connection.json`);
 
       if (workspaceDbConfig) {
         const typeormDataSource = await new DataSource(workspaceDbConfig).initialize();

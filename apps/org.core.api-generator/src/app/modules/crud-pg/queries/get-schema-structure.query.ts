@@ -1,11 +1,11 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { DbQueryDomain } from '../../../domain/db.query.domain';
+import { DbQueryDomain } from '../../../core/db.query.domain';
 import { DataSource } from 'typeorm';
-import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
 import { Logger } from '@nestjs/common';
 import NodeCache from 'node-cache';
 import { DefaultResponseError } from '../errors/default.error';
-import { ApplicationModel } from '../../../domain/models/code-application.model';
+import { ApplicationModel } from '../../../core/models/application.model';
 import { NotFoundAppByIdError } from '../errors/not-found-app-by-id.error';
 
 export class GetSchemaStructureQuery {
@@ -41,7 +41,7 @@ export class GetSchemaStructureQueryHandler
     const tableName = this.dbQueryDomain.getTableName(appid, schema).replace('public.', '');
 
     // Cahing
-    const cacheKey = this.dbQueryDomain.getCachingTableInfo(appid, tableName);
+    const cacheKey = `table_info_cache_app_${appid}_table_${tableName}`
     const tableInfoFromCache = this.nodeCache.get(cacheKey);
 
     if (tableInfoFromCache) {

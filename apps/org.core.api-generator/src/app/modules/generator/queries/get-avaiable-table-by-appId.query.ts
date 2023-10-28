@@ -1,9 +1,10 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { Logger } from '@nestjs/common';
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
+import { EAppTableColumns } from '../../../core/models/application.model';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../core/variables/application-table.variables';
+import { DbQueryDomain } from '../../../core/db.query.domain';
 
 export class GetTableByAppIdQuery {
   constructor(
@@ -17,7 +18,7 @@ export class GetTableByAppIdQueryHandler
   implements IQueryHandler<GetTableByAppIdQuery>
 {
   private readonly queryBuilder!: RelationalDBQueryBuilder;
-  private readonly appCoreDomain!: AppCoreDomain;
+  private readonly dbQueryDomain!: DbQueryDomain;
 
   private readonly logger = new Logger(GetTableByAppIdQueryHandler.name);
 
@@ -25,7 +26,7 @@ export class GetTableByAppIdQueryHandler
     this.queryBuilder = new RelationalDBQueryBuilder(
       APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS,
     );
-    this.appCoreDomain = new AppCoreDomain();
+    this.dbQueryDomain = new DbQueryDomain();
   }
   // DONE
   async execute(query: GetTableByAppIdQuery) {
@@ -46,7 +47,7 @@ export class GetTableByAppIdQueryHandler
       typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
 
-      return this.appCoreDomain.getTableNameFromParser(queryResult);
+      return this.dbQueryDomain.getTableNameFromParser(queryResult);
     } catch (error) {
       this.logger.error(error);
     } finally {

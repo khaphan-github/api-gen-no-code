@@ -3,7 +3,6 @@ import { JsonIoService } from '../../shared/json.io.service';
 import { DataSourceOptions } from 'typeorm';
 import _ from 'lodash';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
 import NodeCache from 'node-cache';
 
@@ -24,18 +23,17 @@ export class GetWorkspaceConnectionQuery { }
 export class GetWorkspaceConnectionQueryHandler
   implements IQueryHandler<GetWorkspaceConnectionQuery>
 {
-  private readonly appCoreDomain!: AppCoreDomain;
   constructor(
     private readonly jsonIO: JsonIoService,
     private readonly nodeCache: NodeCache,
   ) {
-    this.appCoreDomain = new AppCoreDomain();
   }
   // TODO: In future need to chage way to get this connetions/ get from sheet... same same,
   // DONE
   // @return database connection of workspace
   execute(): Promise<DataSourceOptions> {
-    const workspaceId = this.appCoreDomain.getDefaultWorkspaceId();
+    // TODO: Get sql confi path
+    const workspaceId = `connection.json`;
     if (_.isNil(workspaceId)) {
       return Promise.reject(new WorkspaceConnectionShouldNotBeEmpty());
     }

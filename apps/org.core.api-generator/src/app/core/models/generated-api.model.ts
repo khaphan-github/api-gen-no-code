@@ -1,6 +1,24 @@
 import _ from "lodash";
 import { AST, Create } from "node-sql-parser";
-import { EGeneratedApisTableColumns } from "../pgsql/app.core.domain.pg-script";
+
+export enum EGeneratedApisTableColumns {
+  ID = 'id',
+  APP_ID = 'app_id',
+  TABLE_NAME = 'table_name',
+  ACTION = 'action',
+  API_PATH = 'api_path',
+  HTTP_METHOD = 'http_method',
+  AUTHENTICATION = 'authentication',
+  API_AUTHORIZED = 'api_authorized',
+  HEADERS = 'headers',
+  REQUEST_PARAMS = 'request_params',
+  REQUEST_BODY_TYPE = 'request_body_type',
+  REQUEST_BODY = 'request_body',
+  RESPONSE_ATTRIBUTES = 'response_attributes',
+  ENABLE = 'enable',
+  CREATED_AT = 'created_at',
+  UPDATED_AT = 'updated_at'
+}
 
 export enum ApiAction {
   INSERT = 'INSERT',
@@ -21,7 +39,26 @@ export enum Authenticate {
   NEED_AUTH = 'NEED_AUTH',
 }
 
-export class ApisCoreDomain {
+export interface IGeneratedApi {
+  id: number;
+  app_id: number;
+  table_name: string;
+  action: string;
+  api_path: string;
+  http_method: string;
+  authentication: string;
+  api_authorized: object;
+  headers: object;
+  request_params: object;
+  request_body_type: string;
+  request_body: object;
+  response_attributes: object;
+  enable: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export class GeneratedApiModel {
   extractApisFromTableInfo = (appId: number, secretKey: string, tableInfo: AST | AST[]): object[] => {
     const apis: object[] = [];
 
@@ -126,3 +163,4 @@ export class ApisCoreDomain {
     return apiRecord;
   }
 }
+

@@ -1,12 +1,11 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
+import { RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
 import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
-import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import { CanNotGetAppInforError } from '../errors/can-not-get-app-info.error';
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import NodeCache from 'node-cache';
-import { ApplicationModel } from '../../../domain/models/code-application.model';
+import { ApplicationModel, EAppTableColumns } from '../../../core/models/application.model';
+import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../core/variables/application-table.variables';
 
 export class GetAppInfoByAppId {
   constructor(
@@ -19,9 +18,7 @@ export class GetAppInfoByAppId {
 export class GetAppInfoByAppIdHandler
   implements IQueryHandler<GetAppInfoByAppId>
 {
-
   private readonly queryBuilderTableApp!: RelationalDBQueryBuilder;
-  private readonly appCoreDomain!: AppCoreDomain;
 
   constructor(
     private readonly nodeCache: NodeCache,
@@ -29,14 +26,12 @@ export class GetAppInfoByAppIdHandler
     this.queryBuilderTableApp = new RelationalDBQueryBuilder(
       APPLICATIONS_TABLE_NAME, APPLICATIONS_TABLE_AVAILABLE_COLUMS,
     );
-    this.appCoreDomain = new AppCoreDomain();
-
   }
 
   async execute(query: GetAppInfoByAppId): Promise<ApplicationModel> {
     const { workspaceConnection, appId } = query;
     // Cache get app info
-    const appCacheKey = this.appCoreDomain.getAppInfoCacheKey(appId.toString());
+    const appCacheKey = `app_info_${appId}_cache_key`;
     const appInfo = this.nodeCache.get(appCacheKey) as ApplicationModel;
     if (appInfo) {
       return Promise.resolve(appInfo);

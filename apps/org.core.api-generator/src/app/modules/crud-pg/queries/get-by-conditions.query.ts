@@ -1,11 +1,11 @@
 import { EventBus, IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { DbQueryDomain } from '../../../domain/db.query.domain';
+import { DbQueryDomain } from '../../../core/db.query.domain';
 import { Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { QueryParamDataDto, RequestParamDataDto } from '../controller/query-filter.dto';
-import { ConditionObject, QueryBuilderResult, RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
+import { ConditionObject, QueryBuilderResult, RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
 import { InvalidColumnOfTableError } from '../errors/invalid-table-colums.error';
-import { ApplicationModel } from '../../../domain/models/code-application.model';
+import { ApplicationModel } from '../../../core/models/application.model';
 import { CanNotExecuteQueryError } from '../errors/can-not-execute-query.error';
 import { ExecutedSQLQueryEvent } from '../events/executed-query.event';
 

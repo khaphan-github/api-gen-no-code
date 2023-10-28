@@ -3,7 +3,6 @@ import { DataSourceOptions } from 'typeorm';
 import _ from 'lodash';
 import NodeCache from 'node-cache';
 import { JsonIoService } from '../../shared/json.io.service';
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 
 // #region error
@@ -24,16 +23,14 @@ export class GetSQLConnectionQuery {
 export class GetSQLConnectionQueryHandler
   implements IQueryHandler<GetSQLConnectionQuery, DataSourceOptions>
 {
-  private readonly appCoreDomain!: AppCoreDomain;
   constructor(
     private readonly jsonIO: JsonIoService,
     private readonly nodeCache: NodeCache,
   ) {
-    this.appCoreDomain = new AppCoreDomain();
   }
 
   execute(): Promise<DataSourceOptions> {
-    const fileName = this.appCoreDomain.getSQLConnectionFileName();
+    const fileName = `connection.json`;
 
     const sqlConnectionFromCache = this.nodeCache.get<DataSourceOptions>(fileName);
 

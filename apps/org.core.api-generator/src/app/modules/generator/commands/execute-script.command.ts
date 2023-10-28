@@ -2,14 +2,15 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { DataSource, DataSourceOptions, UpdateResult } from 'typeorm';
 import { Logger } from '@nestjs/common';
-import { APPLICATIONS_TABLE_NAME, EAppTableColumns } from '../../../domain/pgsql/app.core.domain.pg-script';
 import _ from 'lodash';
 import { AST, Option, Parser } from 'node-sql-parser';
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 import { ExecutedSQLScriptEvent } from '../events/execute-sql-create-db.event';
 import { CanNotUpdateResultError } from '../../crud-pg/errors/can-not-update-result.error';
 import { NullAttributeError } from '../../shared/errors/null-attribute.error';
 import { CanNotExecuteQueryError } from '../../crud-pg/errors/can-not-execute-query.error';
+import { EAppTableColumns } from '../../../core/models/application.model';
+import { APPLICATIONS_TABLE_NAME } from '../../../core/variables/application-table.variables';
+import { DbQueryDomain } from '../../../core/db.query.domain';
 
 export class ExecuteScriptCommand {
   constructor(
@@ -23,7 +24,7 @@ export class ExecuteScriptCommand {
 @CommandHandler(ExecuteScriptCommand)
 export class ExecuteScriptCommandHandler
   implements ICommandHandler<ExecuteScriptCommand> {
-  private readonly appCoreDomain!: AppCoreDomain;
+  private readonly dbQueryDomain!: DbQueryDomain;
   private readonly queryParser!: Parser;
 
   private readonly logger!: Logger;
@@ -31,7 +32,7 @@ export class ExecuteScriptCommandHandler
   constructor(
     private readonly eventBus: EventBus,
   ) {
-    this.appCoreDomain = new AppCoreDomain();
+    this.dbQueryDomain = new DbQueryDomain();
     this.queryParser = new Parser();
 
     this.logger = new Logger(ExecuteScriptCommandHandler.name);
@@ -69,7 +70,7 @@ export class ExecuteScriptCommandHandler
 
     try {
       createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
-      renamedParser = this.appCoreDomain.convertTableNameByAppId(appId, createDBSCriptParser);
+      renamedParser = this.dbQueryDomain.convertTableNameByAppId(appId, createDBSCriptParser);
       scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
     } catch (error) {
       this.logger.error(error);

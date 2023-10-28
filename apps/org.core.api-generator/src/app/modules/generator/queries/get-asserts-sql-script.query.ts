@@ -2,7 +2,6 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import NodeCache from 'node-cache';
 import { FileReaderService } from '../../shared/file-reader.service';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
 
 // #region error
 export class SQLScripFileNotFoundError extends Error implements ErrorStatusCode {
@@ -21,17 +20,14 @@ export class GetSQLScriptQuery { }
 export class GetSQLScriptQueryHandler
   implements IQueryHandler<GetSQLScriptQuery>
 {
-  private readonly appCoreDomain!: AppCoreDomain;
   constructor(
     private readonly fileReader: FileReaderService,
     private readonly nodeCache: NodeCache,
   ) {
-    this.appCoreDomain = new AppCoreDomain();
   }
 
   execute(): Promise<string> {
-    const fileName = this.appCoreDomain.getSQLScriptFilename();
-
+    const fileName = `database.sql`;
     const sqlScriptCache = this.nodeCache.get<string>(fileName);
     if (sqlScriptCache) {
       return Promise.resolve(sqlScriptCache);

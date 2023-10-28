@@ -1,21 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
-import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
-import { WORKSPACE_AVAILABLE_COLUMNS, WORKSPACE_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
-
-export class AppAlreadyExistError extends Error {
-  constructor(
-    public readonly appName: string,
-    public readonly statusCode?: number,
-    public readonly metadata?: object,
-  ) {
-    super();
-    this.message = `Application ${appName} already exist`;
-    this.name = AppAlreadyExistError.name;
-  }
-}
 
 export class RunScriptCommand {
   constructor(
@@ -28,15 +13,8 @@ export class RunScriptCommand {
 export class RunScriptCommandHandler
   implements ICommandHandler<RunScriptCommand>
 {
-  private readonly appCoreDomain!: AppCoreDomain;
-  private readonly queryBuilder!: RelationalDBQueryBuilder;
 
   private readonly logger = new Logger(RunScriptCommandHandler.name);
-
-  constructor() {
-    this.appCoreDomain = new AppCoreDomain();
-    this.queryBuilder = new RelationalDBQueryBuilder(WORKSPACE_TABLE_NAME, WORKSPACE_AVAILABLE_COLUMNS);
-  }
 
   /**LOGIC:
    * Kiểm tra kết nối cơ sở dữ liệu, thực hiện kết nối đến cơ sở dữ liệu tương ứng

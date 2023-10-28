@@ -2,10 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
 import { Logger } from '@nestjs/common';
 import { DataSource, DataSourceOptions } from "typeorm";
-import { AppCoreDomain } from '../../../domain/pgsql/pg.app.core.domain';
-import { JsonIoService } from '../../shared/json.io.service';
-import { RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
-import { EWorkspaceColumns, WORKSPACE_AVAILABLE_COLUMNS, WORKSPACE_TABLE_NAME } from '../../../domain/pgsql/app.core.domain.pg-script';
+import { RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
+import { EWorkspaceColumns } from '../../../core/models/workspace.model';
+import { WORKSPACE_AVAILABLE_COLUMNS, WORKSPACE_TABLE_NAME } from '../../../core/variables/workspace-table.variables';
+import { FileReaderService } from '../../shared/file-reader.service';
 
 export class AppAlreadyExistError extends Error {
   constructor(
@@ -31,15 +31,13 @@ export class CreateWorkspaceCommand {
 export class CreateWorkspaceCommandHandler
   implements ICommandHandler<CreateWorkspaceCommand>
 {
-  private readonly appCoreDomain!: AppCoreDomain;
   private readonly queryBuilder!: RelationalDBQueryBuilder;
 
   private readonly logger = new Logger(CreateWorkspaceCommandHandler.name);
 
   constructor(
-    private readonly jsonIO: JsonIoService,
+    private readonly fileReaderService: FileReaderService,
   ) {
-    this.appCoreDomain = new AppCoreDomain();
     this.queryBuilder = new RelationalDBQueryBuilder(WORKSPACE_TABLE_NAME, WORKSPACE_AVAILABLE_COLUMNS);
   }
 
@@ -54,24 +52,35 @@ export class CreateWorkspaceCommandHandler
   async execute(command: CreateWorkspaceCommand) {
     const { database, databaseName, host, password, port, username } = command.CreateWorkspaceDto;
     let typeormDataSource: DataSource;
+
+    const dbConfig: DataSourceOptions = {
+      type: database,
+      host: host,
+      port: port,
+      username: username,
+      password: password,
+      database: databaseName,
+    };
     try {
-      const dbConfig: DataSourceOptions = {
-        type: database,
-        host: host,
-        port: port,
-        username: username,
-        password: password,
-        database: databaseName,
-      };
+
 
       typeormDataSource = await new DataSource(dbConfig).initialize();
+      const getScript = (file: string) => `private/scripts/pg/${file}.sql`;
 
-      // Only create if not exist
-      const queryInitCoreTable = `
-        BEGIN;
-          ${this.appCoreDomain.getCreateWorkspaceScript()}
-          ${this.appCoreDomain.getCreateApisTableScript()}
-          ${this.appCoreDomain.getCreateApplicationScript()}
+      const createApplicationTableSQL =
+        this.fileReaderService.readFileStringByFileName(getScript('create-app-table'));
+
+      const createWorkspaceTableSql =
+        this.fileReaderService.readFileStringByFileName(getScript('create-workspace-table'));
+
+      const createGeneratedApiTableSQl =
+        this.fileReaderService.readFileStringByFileName(getScript('create-generated-api-table'));
+
+      const queryInitCoreTable =
+        ` BEGIN;
+          ${createApplicationTableSQL}
+          ${createWorkspaceTableSql}
+          ${createGeneratedApiTableSQl}
         COMMIT;
       `
       await typeormDataSource.query(queryInitCoreTable);

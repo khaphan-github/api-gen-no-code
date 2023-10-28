@@ -1,11 +1,11 @@
 import { Logger } from '@nestjs/common';
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { DataSource } from 'typeorm';
-import { DbQueryDomain } from '../../../domain/db.query.domain';
-import { QueryBuilderResult, RelationalDBQueryBuilder } from '../../../domain/pgsql/pg.relationaldb.query-builder';
+import { DbQueryDomain } from '../../../core/db.query.domain';
+import { QueryBuilderResult, RelationalDBQueryBuilder } from '../../../core/pgsql/pg.relationaldb.query-builder';
 import { InvalidColumnOfTableError } from '../errors/invalid-table-colums.error';
 import { checkObjectsForSameKey } from '../../../lib/utils/check-array-object-match-key';
-import { ApplicationModel } from '../../../domain/models/code-application.model';
+import { ApplicationModel } from '../../../core/models/application.model';
 import { EmptyRecordWhenInsertError } from '../errors/empty-record-when-insert.error';
 import { DataToInsertNotHaveSameKeyError } from '../errors/data-insert-not-have-have-key.error';
 import { CanNotInsertNewRecordError } from '../errors/can-not-insert-new-record.errror';
