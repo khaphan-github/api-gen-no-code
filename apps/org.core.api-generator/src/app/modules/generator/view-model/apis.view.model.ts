@@ -11,7 +11,7 @@ export interface IGeneratedApiViewModel {
   authentication: string;
   api_authorized: object;
   headers: object;
-  request_params: object;
+  request_params: string;
   request_body_type: string;
   request_body: string;
   response_attributes: object;
@@ -34,7 +34,7 @@ export class ApiGeneratedViewModel {
         authentication: args.authentication,
         api_authorized: args.api_authorized,
         headers: args.headers,
-        request_params: args.request_params,
+        request_params: JSON.stringify(args.request_params, null, 1),
         request_body_type: args.request_body_type,
         request_body: JSON.stringify(args.request_body, null, 1),
         response_attributes: args.response_attributes,

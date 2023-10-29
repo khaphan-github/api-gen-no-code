@@ -79,7 +79,6 @@ export class SQLToAPIService implements OnApplicationBootstrap {
         this.logger.log(`GENNERATE API SUCCESS`);
       }
     } catch (error) {
-      console.error(error);
       //
     }
   }

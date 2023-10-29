@@ -104,8 +104,6 @@ export class ExecuteScriptCommandHandler
       return Promise.reject(new CanNotUpdateResultError(appId, APPLICATIONS_TABLE_NAME, appId, error.message));
     }
 
-    console.log(createDBSCriptParser);
-
     this.eventBus.publish(
       new ExecutedSQLScriptEvent(workspaceConnections, ownerId, appId, createDBSCriptParser)
     );

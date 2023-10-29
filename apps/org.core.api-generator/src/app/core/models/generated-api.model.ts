@@ -119,7 +119,7 @@ export class GeneratedApiModel {
     const apiPath = `/api/v1/app/${appId}/schema/${tableName}`;
 
     const { ACTION, API_PATH, APP_ID, AUTHENTICATION, CREATED_AT, ENABLE, HEADERS, HTTP_METHOD,
-      REQUEST_BODY, RESPONSE_ATTRIBUTES, TABLE_NAME, UPDATED_AT } = EGeneratedApisTableColumns;
+      REQUEST_BODY, RESPONSE_ATTRIBUTES, TABLE_NAME, UPDATED_AT, REQUEST_PARAMS } = EGeneratedApisTableColumns;
 
     apiRecord[APP_ID] = appId;
     apiRecord[TABLE_NAME] = tableName;
@@ -136,14 +136,22 @@ export class GeneratedApiModel {
 
     switch (typeApi) {
       case RestFulMethod.GET:
-        apiRecord[API_PATH] = `${apiPath}/query?page=0&size=10&orderby=id&sort=DESC&selectes=id`;
+        apiRecord[API_PATH] = `${apiPath}/query`;
+        apiRecord[REQUEST_PARAMS] = {
+          page: 0,
+          size: 10,
+          orderby: 'idExample',
+          sort: 'DESC/ASC',
+          selectes: 'idExample',
+        };
         apiRecord[HTTP_METHOD] = RestFulMethod.GET;
         apiRecord[ACTION] = ApiAction.QUERY;
-
 
         break;
       case RestFulMethod.POST:
         apiRecord[API_PATH] = apiPath;
+        apiRecord[REQUEST_PARAMS] = {};
+
         apiRecord[HTTP_METHOD] = RestFulMethod.POST;
         apiRecord[ACTION] = ApiAction.INSERT;
         apiRecord[REQUEST_BODY] = JSON.stringify([requestBody]);
@@ -152,6 +160,8 @@ export class GeneratedApiModel {
         break;
       case RestFulMethod.PUT:
         apiRecord[API_PATH] = `${apiPath}/:id`;
+        apiRecord[REQUEST_PARAMS] = {};
+
         apiRecord[HTTP_METHOD] = RestFulMethod.PUT;
         apiRecord[ACTION] = ApiAction.UPDATE;
         apiRecord[REQUEST_BODY] = JSON.stringify([requestBody]);
@@ -160,6 +170,7 @@ export class GeneratedApiModel {
         break;
       case RestFulMethod.DELETE:
         apiRecord[API_PATH] = `${apiPath}/:id`;
+        apiRecord[REQUEST_PARAMS] = {};
         apiRecord[HTTP_METHOD] = RestFulMethod.DELETE;
         apiRecord[ACTION] = ApiAction.DELETE;
         break;
