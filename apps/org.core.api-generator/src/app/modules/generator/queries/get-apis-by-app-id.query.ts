@@ -49,6 +49,8 @@ export class GetApisByAppIdQueryHandler
     try {
       typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
+      await typeormDataSource?.destroy();
+
       this.nodeCache.set(cacheKey, queryResult);
       return Promise.resolve(queryResult);
     } catch (error) {

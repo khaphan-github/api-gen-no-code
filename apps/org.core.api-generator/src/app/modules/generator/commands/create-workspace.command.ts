@@ -53,7 +53,7 @@ export class CreateWorkspaceCommandHandler
     const { database, databaseName, host, password, port, username } = command.CreateWorkspaceDto;
     let typeormDataSource: DataSource;
 
-    const dbConfig: DataSourceOptions = {
+    const dbConfig = {
       type: database,
       host: host,
       port: port,
@@ -64,7 +64,7 @@ export class CreateWorkspaceCommandHandler
     try {
 
 
-      typeormDataSource = await new DataSource(dbConfig).initialize();
+      typeormDataSource = await new DataSource(dbConfig as DataSourceOptions).initialize();
       const getScript = (file: string) => `private/scripts/pg/${file}.sql`;
 
       const createApplicationTableSQL =

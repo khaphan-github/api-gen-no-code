@@ -45,7 +45,7 @@ export class GetSchemaStructureQueryHandler
     const tableInfoFromCache = this.nodeCache.get(cacheKey);
 
     if (tableInfoFromCache) {
-      return tableInfoFromCache;
+      return Promise.resolve(tableInfoFromCache);
     }
 
     const { queryString, params } = this.relationalDBQueryBuilder.getByQuery(
@@ -58,6 +58,7 @@ export class GetSchemaStructureQueryHandler
       typeormDataSource = await new DataSource(appInfo.database_config).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
       if (!queryResult || queryResult?.length == 0) {
+        await typeormDataSource?.destroy();
         return Promise.reject(new NotFoundAppByIdError(appid, schema));
       }
       this.nodeCache.set(cacheKey, queryResult);

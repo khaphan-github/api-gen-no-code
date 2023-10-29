@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, HttpException, HttpStatus, Param, Post, Put, Query } from '@nestjs/common';
 import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { ConditionObject } from '../../../core/pgsql/pg.relationaldb.query-builder';
@@ -47,12 +47,11 @@ export class CrudController {
       const queryResult = await this.service.query(requestParamDataDto, queryParamDataDto, conditions);
       return new ResponseBase(200, 'Query success', queryResult);
     } catch (error) {
-      return new ErrorBase(error);
+      throw new HttpException(new ErrorBase(error), HttpStatus.OK);
     }
   }
 
   @Delete(':id')
-  @HttpCode(204)
   async deleteById(
     @Param('appid') appId: string,
     @Param('schema') schema: string,
@@ -60,10 +59,10 @@ export class CrudController {
     @Query('id_column') column: string
   ) {
     try {
-      const deleteResult = await this.service.delete(appId, schema, id, column);
-      return new ResponseBase(204, 'Delete success', deleteResult);
+      await this.service.delete(appId, schema, id, column);
+      return new ResponseBase(204, 'Delete success');
     } catch (error) {
-      return new ErrorBase(error);
+      throw new HttpException(new ErrorBase(error), HttpStatus.OK);
     }
   }
 
@@ -86,7 +85,7 @@ export class CrudController {
       const insertResult = await this.service.insert(appId, schema, data);
       return new ResponseBase(201, 'Insert success', insertResult);
     } catch (error) {
-      return new ErrorBase(error);
+      throw new HttpException(new ErrorBase(error), HttpStatus.OK);
     }
   }
 
@@ -111,7 +110,7 @@ export class CrudController {
       const updateResult = await this.service.update(appId, schema, id, idColumn, data);
       return new ResponseBase(200, 'Update success', updateResult);
     } catch (error) {
-      return new ErrorBase(error);
+      throw new HttpException(new ErrorBase(error), HttpStatus.OK);
     }
   }
 }

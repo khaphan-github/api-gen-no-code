@@ -41,7 +41,8 @@ export class TaskGenerateAPIsCommandHandler
     try {
       workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await workspaceTypeormDataSource.query(queryString, params);
-      workspaceTypeormDataSource?.destroy();
+
+      await workspaceTypeormDataSource?.destroy();
       return queryResult;
     } catch (error) {
       await workspaceTypeormDataSource?.destroy();

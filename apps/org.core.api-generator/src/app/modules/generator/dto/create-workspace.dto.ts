@@ -7,7 +7,7 @@ export class CreateWorkspaceDto {
     default: 'postgres'
   })
   @IsNotEmpty()
-  database: any;
+  database: string;
 
   // Databsase config.
   @ApiProperty({

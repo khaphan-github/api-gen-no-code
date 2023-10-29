@@ -11,6 +11,8 @@ import { DataToInsertNotHaveSameKeyError } from '../errors/data-insert-not-have-
 import { CanNotInsertNewRecordError } from '../errors/can-not-insert-new-record.errror';
 import { ExecutedSQLQueryEvent } from '../events/executed-query.event';
 import { NotFoundAppByIdError } from '../errors/not-found-app-by-id.error';
+import _ from 'lodash';
+import { InvalidFormatError } from '../errors/invalid-format.error';
 
 export class CreateDataCommand {
   constructor(
@@ -45,9 +47,13 @@ export class CreateDataCommandHandler
       return Promise.reject(new NotFoundAppByIdError(appId, 'CreateDataCommandHandler not found application info'));
     }
 
+    if (!(data instanceof Array)) {
+      return Promise.reject(new InvalidFormatError(`Format of request body must be an array of objects [{}]`))
+    }
+
     const tableName = this.dbQueryDomain.getTableName(appId, schema);
 
-    if (!data || data.length == 0) {
+    if (!data || _.isEmpty(data) || data.length == 0) {
       return Promise.reject(new EmptyRecordWhenInsertError(appId, tableName));
     }
 
@@ -62,7 +68,7 @@ export class CreateDataCommandHandler
     // Prepare insert query builder
     let insertQuery: QueryBuilderResult;
     try {
-      insertQuery = this.queryBuilderTableInsert.insertMany(data, Object.keys(data[0]));
+      insertQuery = this.queryBuilderTableInsert.insertMany(data);
     } catch (error) {
       return Promise.reject(new InvalidColumnOfTableError(appId, schema, error.message));
     }
@@ -73,7 +79,7 @@ export class CreateDataCommandHandler
       workspaceDataSource = await new DataSource(appInfo.database_config).initialize();
       const queryResult = await workspaceDataSource.query(insertQuery.queryString, insertQuery.params);
       await workspaceDataSource?.destroy();
-      this.eventBus.publish(new ExecutedSQLQueryEvent('CreateDataCommandHandler', insertQuery, queryResult))
+      this.eventBus.publish(new ExecutedSQLQueryEvent(CreateDataCommandHandler.name, insertQuery, queryResult))
       return Promise.resolve(queryResult);
     } catch (error) {
       await workspaceDataSource?.destroy();

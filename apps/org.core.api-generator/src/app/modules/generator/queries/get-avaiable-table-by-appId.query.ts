@@ -46,6 +46,7 @@ export class GetTableByAppIdQueryHandler
     try {
       typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
+      await typeormDataSource?.destroy();
 
       return this.dbQueryDomain.getTableNameFromParser(queryResult);
     } catch (error) {

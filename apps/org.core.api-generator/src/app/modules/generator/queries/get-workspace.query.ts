@@ -43,7 +43,7 @@ export class GetWorkspaceByIdQueryHandler
 
       const { queryString, params } = this.queryBuilder.getByQuery({}, ['database_config']);
       const queryResult = await typeormDataSource.query(queryString, params);
-      await typeormDataSource.destroy();
+      await typeormDataSource?.destroy();
       return queryResult[0]?.database_config;
 
     } catch (error) {

@@ -59,7 +59,6 @@ export class UpdateDataCommandHandler
       const updateResult = await workspaceTypeOrmDataSource.query(query, queryParam);
       await workspaceTypeOrmDataSource?.destroy();
       this.eventBus.publish(new ExecutedSQLQueryEvent('UpdateDataCommandHandler', { query, queryParam }, updateResult[0]))
-
       return Promise.resolve(updateResult[0]);
     } catch (error) {
       await workspaceTypeOrmDataSource?.destroy();

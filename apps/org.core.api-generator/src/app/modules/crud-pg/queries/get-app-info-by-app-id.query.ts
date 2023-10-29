@@ -6,6 +6,7 @@ import { CanNotGetAppInforError } from '../errors/can-not-get-app-info.error';
 import NodeCache from 'node-cache';
 import { ApplicationModel, EAppTableColumns } from '../../../core/models/application.model';
 import { APPLICATIONS_TABLE_AVAILABLE_COLUMS, APPLICATIONS_TABLE_NAME } from '../../../core/variables/application-table.variables';
+import { NotFoundAppByIdError } from '../errors/not-found-app-by-id.error';
 
 export class GetAppInfoByAppId {
   constructor(
@@ -51,8 +52,13 @@ export class GetAppInfoByAppIdHandler
       const appDBConfig = await workspaceTypeOrmDataSource.query(
         queryAppScript.queryString, queryAppScript.params
       );
-      this.nodeCache.set(appCacheKey, appDBConfig[0]);
       await workspaceTypeOrmDataSource?.destroy();
+
+      if (appDBConfig?.length === 0) {
+        return Promise.reject(new NotFoundAppByIdError(appId, APPLICATIONS_TABLE_NAME));
+      }
+
+      this.nodeCache.set(appCacheKey, appDBConfig[0]);
       return Promise.resolve(appDBConfig[0]);
     } catch (error) {
       await workspaceTypeOrmDataSource?.destroy();

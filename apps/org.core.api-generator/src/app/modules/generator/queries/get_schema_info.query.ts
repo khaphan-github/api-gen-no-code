@@ -45,6 +45,8 @@ export class GetSchemaInfoByAppIdQueryHandler
     try {
       workspaceTypeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = (await workspaceTypeormDataSource.query(queryString, params))[0];
+      await workspaceTypeormDataSource?.destroy();
+
       return queryResult?.tables_info;
     } catch (error) {
       this.logger.error(error);

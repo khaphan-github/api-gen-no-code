@@ -102,7 +102,7 @@ export class RelationalDBQueryBuilder {
       valueArray = valueArray.concat(values);
     })
 
-    let returningQuery = '';
+    let returningQuery = 'RETURNING *';
     if (returning && returning?.length > 0) {
       this.validateColumns(returning);
       returningQuery = `RETURNING ${returning.join(', ')}`;

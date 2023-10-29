@@ -61,8 +61,11 @@ export class DeleteDataCommandHandler
       const deleteResult = await workspaceTypeOrmDataSource.query(query, queryParam);
 
       await workspaceTypeOrmDataSource?.destroy();
-      this.eventBus.publish(new ExecutedSQLQueryEvent('DeleteDataCommandHandler', { query, queryParam }, deleteResult))
+      this.eventBus.publish(new ExecutedSQLQueryEvent(DeleteDataCommandHandler.name, { query, queryParam }, deleteResult))
 
+      if (deleteResult[1] === 0) {
+        return Promise.reject(new CanNotDeleteResultError(appid, schema, id, `Not found record by this id`))
+      }
       return Promise.resolve(deleteResult[1]);
     } catch (error) {
       await workspaceTypeOrmDataSource?.destroy();

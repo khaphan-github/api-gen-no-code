@@ -96,6 +96,8 @@ export class ExecuteScriptCommandHandler
         })
         .where(`${APPLICATIONS_TABLE_NAME}.id = :id`, { id: appId })
         .execute();
+
+      await workspaceTypeormDataSource?.destroy();
     } catch (error) {
       await workspaceTypeormDataSource?.destroy();
       return Promise.reject(new CanNotUpdateResultError(appId, APPLICATIONS_TABLE_NAME, appId, error.message));

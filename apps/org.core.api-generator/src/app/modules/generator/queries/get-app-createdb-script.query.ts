@@ -49,6 +49,8 @@ export class GetCreatedDbScriptByAppIdQueryHandler
     try {
       typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(queryString, params);
+      await typeormDataSource?.destroy();
+
       return queryResult[0];
     } catch (error) {
       this.logger.error(error);
