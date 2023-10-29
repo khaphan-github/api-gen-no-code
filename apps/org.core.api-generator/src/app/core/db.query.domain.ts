@@ -3,7 +3,8 @@ import { AST, Create } from "node-sql-parser";
 
 export class DbQueryDomain {
   getTableName(appId: string, tableName: string) {
-    return `app_${appId}_${tableName}`
+    // return `app_${appId}_${tableName}`;
+    return `${tableName}`
   }
 
   getTableColumnNameArray = (tableInfo: object[], property: string): string[] => {

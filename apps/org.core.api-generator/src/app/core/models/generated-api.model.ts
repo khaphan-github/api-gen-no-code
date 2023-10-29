@@ -65,22 +65,26 @@ export class GeneratedApiModel {
     try {
       if (_.isArray(tableInfo)) {
         _.forEach(tableInfo, (_info: Create) => {
-          const api = this.mapASTToAPI(appId, secretKey, _info)
+          if (_info.type == 'create' && _info.keyword == 'table') {
+            const api = this.mapASTToAPI(appId, secretKey, _info)
+            apis.push(api.insert);
+            apis.push(api.update);
+            apis.push(api.delete);
+            apis.push(api.query);
+          }
+        });
+        return apis;
+      } else {
+        if (tableInfo.type == 'create' && tableInfo.keyword == 'table') {
+          const api = this.mapASTToAPI(appId, secretKey, tableInfo as Create);
           apis.push(api.insert);
           apis.push(api.update);
           apis.push(api.delete);
           apis.push(api.query);
-        });
-        return apis;
-      } else {
-        const api = this.mapASTToAPI(appId, secretKey, tableInfo as Create);
-        apis.push(api.insert);
-        apis.push(api.update);
-        apis.push(api.delete);
-        apis.push(api.query);
+        }
       }
     } catch (error) {
-      console.log('NEED TO HANDLE FORIENCE KEY EXTRACT API');
+      console.error(error);
     }
 
     return apis;
@@ -106,12 +110,12 @@ export class GeneratedApiModel {
     const requestBody = {};
     _info?.create_definitions?.forEach(item => {
       if (item.column) {
-        const columnName = item?.column?.column;
+        const columnName = item?.column?.column?.toLocaleLowerCase();
         requestBody[columnName] = 'your_data';
       }
     });
 
-    const tableName = (_info?.table[0]?.table as string).toLocaleLowerCase() ?? '';
+    const tableName = (_info?.table[0]?.table as string)?.toLocaleLowerCase() ?? '';
     const apiPath = `/api/v1/app/${appId}/schema/${tableName}`;
 
     const { ACTION, API_PATH, APP_ID, AUTHENTICATION, CREATED_AT, ENABLE, HEADERS, HTTP_METHOD,

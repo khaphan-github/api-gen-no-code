@@ -51,7 +51,7 @@ export class ExecuteScriptCommandHandler
     // Docs: https://www.npmjs.com/package/node-sql-parser
     // TODO: Database type:
     const parserOptions: Option = {
-      database: 'Postgresql'
+      database: 'Postgresql',
     }
 
     // #endregion init necessary static data
@@ -64,25 +64,26 @@ export class ExecuteScriptCommandHandler
       return Promise.reject(new CanNotExecuteQueryError(appId, '', error.message));
     }
 
-    let scriptTableRenamed: string;
+    // let scriptTableRenamed: string;
     let renamedParser: AST | AST[];
     let createDBSCriptParser: AST | AST[];
 
     try {
       createDBSCriptParser = this.queryParser.astify(script.script, parserOptions);
-      renamedParser = this.dbQueryDomain.convertTableNameByAppId(appId, createDBSCriptParser);
-      scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
+      // renamedParser = this.dbQueryDomain.convertTableNameByAppId(appId, createDBSCriptParser);
+      // ERROR: INT4 - INT(4)
+      // scriptTableRenamed = this.queryParser.sqlify(renamedParser, parserOptions);
     } catch (error) {
       this.logger.error(error);
     }
-    const executeScriptTransaction = `BEGIN; ${scriptTableRenamed}; COMMIT;`
+    const executeScriptTransaction = script.script;
 
     let executeGenrateDBResult: unknown;
     try {
       await workspaceTypeormDataSource.query(executeScriptTransaction);
     } catch (error) {
       await workspaceTypeormDataSource?.destroy();
-      return Promise.reject(new CanNotExecuteQueryError(appId, '', error.message));
+      return Promise.reject(new CanNotExecuteQueryError(appId, 'All shema', error.message));
     }
 
     let executeUpdateAppResult: UpdateResult;
@@ -102,6 +103,8 @@ export class ExecuteScriptCommandHandler
       await workspaceTypeormDataSource?.destroy();
       return Promise.reject(new CanNotUpdateResultError(appId, APPLICATIONS_TABLE_NAME, appId, error.message));
     }
+
+    console.log(createDBSCriptParser);
 
     this.eventBus.publish(
       new ExecutedSQLScriptEvent(workspaceConnections, ownerId, appId, createDBSCriptParser)
