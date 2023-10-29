@@ -101,8 +101,6 @@ export class ExecuteScriptCommandHandler
     } catch (error) {
       await workspaceTypeormDataSource?.destroy();
       return Promise.reject(new CanNotUpdateResultError(appId, APPLICATIONS_TABLE_NAME, appId, error.message));
-    } finally {
-      await workspaceTypeormDataSource.destroy();
     }
 
     this.eventBus.publish(

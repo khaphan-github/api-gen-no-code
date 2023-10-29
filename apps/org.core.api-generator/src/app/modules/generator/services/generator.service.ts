@@ -16,6 +16,7 @@ import { GetApisByAppIdQuery } from "../queries/get-apis-by-app-id.query";
 import { SQLTransformerDto } from "../controllers/mll.query.dto";
 import { SQLTransformerProxy } from "../proxy/sql.transformer.proxy";
 import { RunScriptCommand } from "../commands/run-script-command";
+import { ApiGeneratedViewModel } from "../view-model/apis.view.model";
 
 @Injectable()
 export class GeneratorService {
@@ -94,6 +95,14 @@ export class GeneratorService {
     );
 
     return commandResult;
+  }
+
+  async getApiGeneratedHbsView(appId: number, ownerId: string) {
+    const viewModel = new ApiGeneratedViewModel();
+
+    const workspaceConnection = await this.getWorkspaceConnection();
+    const apis = await this.queryBus.execute(new GetApisByAppIdQuery(workspaceConnection, ownerId, appId));
+    return viewModel.getApiDocsDisplay(apis);
   }
 
 } 

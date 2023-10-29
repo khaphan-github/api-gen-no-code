@@ -132,7 +132,7 @@ export class GeneratedApiModel {
 
     switch (typeApi) {
       case RestFulMethod.GET:
-        apiRecord[API_PATH] = apiPath;
+        apiRecord[API_PATH] = `${apiPath}/query?page=0&size=10&orderby=id&sort=DESC&selectes=id`;
         apiRecord[HTTP_METHOD] = RestFulMethod.GET;
         apiRecord[ACTION] = ApiAction.QUERY;
 

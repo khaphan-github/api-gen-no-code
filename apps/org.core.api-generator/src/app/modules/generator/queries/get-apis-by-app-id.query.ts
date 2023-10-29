@@ -56,8 +56,6 @@ export class GetApisByAppIdQueryHandler
     } catch (error) {
       this.logger.error(error);
       return Promise.reject(new DefaultResponseError(error.message));
-    } finally {
-      await typeormDataSource?.destroy();
     }
   }
 }

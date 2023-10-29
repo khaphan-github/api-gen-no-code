@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Render } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ExecuteScriptDto } from '../dto/script.dto';
 import { GeneratorService } from '../services/generator.service';
@@ -129,6 +129,13 @@ export class GeneratorController {
     });
   }
 
-  // TODO: Enable to save this aswer as an api
-
+  @Get('app/:appid/api/doc')
+  @Render('api-doc')
+  async getApiDocsTemplate(
+    @Param('appid') appId: number,
+  ) {
+    const ownerID = 'test_owner_id';
+    const apis = await this.service.getApiGeneratedHbsView(appId, ownerID);
+    return { viewData: apis };
+  }
 }
