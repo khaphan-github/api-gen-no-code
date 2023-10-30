@@ -100,7 +100,7 @@ CREATE TABLE
 ### Nice! Now run this project
 To run this project you need to make sure that your are in root project - where found `project.json` file:
 ```
-cd apps/org.core.api-generator
+cd apps/interated
 ```
 ![image](https://github.com/khaphan-github/api-gen-no-code/assets/76431966/c4c7615a-19fd-4af8-8601-caa1c43f02fc)
 

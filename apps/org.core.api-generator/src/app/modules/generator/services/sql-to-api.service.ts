@@ -24,48 +24,48 @@ export class SQLToAPIService implements OnApplicationBootstrap {
 
   //#region api to sql
   executeScriptFromSqlFile = async () => {
-    const [connection, script] = await Promise.all([
-      this.queryBus.execute(new GetSQLConnectionQuery()),
-      this.queryBus.execute(new GetSQLScriptQuery()),
-    ]);
-    const { type, database, host, password, port, username } = connection;
-    this.logger.debug(`Get config database.sql and connection.json success!`);
+    try {
+      const [connection, script] = await Promise.all([
+        this.queryBus.execute(new GetSQLConnectionQuery()),
+        this.queryBus.execute(new GetSQLScriptQuery()),
+      ]);
+      const { type, database, host, password, port, username } = connection;
+      this.logger.debug(`Get config database.sql and connection.json success!`);
 
-    await this.commandBus.execute(
-      new CreateWorkspaceCommand(
+      await this.commandBus.execute(
+        new CreateWorkspaceCommand(
+          WORKSPACE_VARIABLE.OWNER_ID,
+          {
+            database: type, // <-- type
+            databaseName: database,
+            host: host,
+            password: password,
+            port: port,
+            username: username,
+          },
+          WORKSPACE_VARIABLE.WORKSPACE_ID),
+      );
+
+      this.logger.debug(`Found workspace ${WORKSPACE_VARIABLE.WORKSPACE_ID}! `);
+
+      await this.commandBus.execute(new CreateApplicationCommand(
         WORKSPACE_VARIABLE.OWNER_ID,
         {
-          database: type, // <-- type
+          appName: WORKSPACE_VARIABLE.APP_NAME,
+          database: type,
           databaseName: database,
           host: host,
           password: password,
           port: port,
+          useDefaultDb: true,
           username: username,
+          workspaceId: WORKSPACE_VARIABLE.WORKSPACE_ID,
         },
-        WORKSPACE_VARIABLE.WORKSPACE_ID),
-    );
+        WORKSPACE_VARIABLE.APP_ID,
+      ));
 
-    this.logger.debug(`Found workspace ${WORKSPACE_VARIABLE.WORKSPACE_ID}! `);
+      this.logger.debug(`Found application ${WORKSPACE_VARIABLE.APP_ID}!`);
 
-    await this.commandBus.execute(new CreateApplicationCommand(
-      WORKSPACE_VARIABLE.OWNER_ID,
-      {
-        appName: WORKSPACE_VARIABLE.APP_NAME,
-        database: type,
-        databaseName: database,
-        host: host,
-        password: password,
-        port: port,
-        useDefaultDb: true,
-        username: username,
-        workspaceId: WORKSPACE_VARIABLE.WORKSPACE_ID,
-      },
-      WORKSPACE_VARIABLE.APP_ID,
-    ));
-
-    this.logger.debug(`Found application ${WORKSPACE_VARIABLE.APP_ID}!`);
-
-    try {
       const executeResult = await this.commandBus.execute(
         new ExecuteScriptCommand(
           connection,
