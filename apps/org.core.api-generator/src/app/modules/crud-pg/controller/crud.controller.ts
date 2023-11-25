@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, HttpException, HttpStatus, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, Query } from '@nestjs/common';
 import { QueryParamDataDto, RequestParamDataDto } from './query-filter.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { ConditionObject } from '../../../core/pgsql/pg.relationaldb.query-builder';
@@ -109,6 +109,31 @@ export class CrudController {
     try {
       const updateResult = await this.service.update(appId, schema, id, idColumn, data);
       return new ResponseBase(200, 'Update success', updateResult);
+    } catch (error) {
+      throw new HttpException(new ErrorBase(error), HttpStatus.OK);
+    }
+  }
+
+  @Get('count')
+  async countAll(@Param('appid') appId: string,
+    @Param('schema') schema: string
+  ) {
+    try {
+      const updateResult = await this.service.countAll(appId, schema);
+      return new ResponseBase(200, 'Count all success', updateResult);
+    } catch (error) {
+      throw new HttpException(new ErrorBase(error), HttpStatus.OK);
+    }
+  }
+
+  @Get('total-table')
+  async totalTable(
+    @Param('appid') appId: string,
+    @Param('schema') schema: string
+  ) {
+    try {
+      const updateResult = await this.service.totalTable(appId, schema);
+      return new ResponseBase(200, 'Count all success', updateResult);
     } catch (error) {
       throw new HttpException(new ErrorBase(error), HttpStatus.OK);
     }

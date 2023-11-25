@@ -495,7 +495,7 @@ add
 alter table NoiDungToChuc
 add
     constraint FK_NOIDUNGT_RELATIONS_HOATDONG foreign key (maHoatDong) references HoatDong (maHoatDong) on delete restrict on update restrict;
-
+ 
 alter table PhieuDangKy
 add
     constraint FK_PHIEUDAN_RELATIONS_TAIKHOAN foreign key (maSo) references TaiKhoan (maSo) on delete restrict on update restrict;
@@ -503,7 +503,7 @@ add
 alter table PhieuDangKy
 add
     constraint FK_PHIEUDAN_RELATIONS_HOATDONG foreign key (maHoatDong) references HoatDong (maHoatDong) on delete restrict on update restrict;
-
+ 
 alter table TaiKhoan
 add
     constraint FK_TAIKHOAN_RELATIONS_CHUCVU foreign key (maChucVu) references ChucVu (maChucVu) on delete restrict on update restrict;

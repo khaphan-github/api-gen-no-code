@@ -10,6 +10,7 @@ import { GetSchemaStructureQuery } from "../queries/get-schema-structure.query";
 import { GetWorkspaceConnectionQuery } from "../../generator/queries/get-workspace-connection.query";
 import { GetAppInfoByAppId } from "../queries/get-app-info-by-app-id.query";
 import { ApplicationModel } from "../../../core/models/application.model";
+import { RunScriptCommand } from "../../generator/commands/run-script-command";
 
 @Injectable()
 export class CrudService {
@@ -56,4 +57,26 @@ export class CrudService {
       new GetDataQuery(appInfo, tableInfo, requestParamDataDto, queryParamDataDto, conditions)
     );
   }
+
+  // Additional:
+  async countAll(appId: string, schema: string) {
+    const workspaceConnection = await this.queryBus.execute(new GetWorkspaceConnectionQuery());
+
+    return this.commandBus.execute(
+      new RunScriptCommand(workspaceConnection, `SELECT COUNT(*) FROM ${schema}`)
+    );
+  }
+
+  async totalTable(appId: string, schema: string) {
+    const workspaceConnection = await this.queryBus.execute(new GetWorkspaceConnectionQuery());
+
+    return this.commandBus.execute(
+      new RunScriptCommand(workspaceConnection, `
+        SELECT count(*)
+        FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+      `)
+    );
+  }
+
 }

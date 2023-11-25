@@ -2,8 +2,8 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { DataSourceOptions } from 'typeorm';
 import _ from 'lodash';
 import NodeCache from 'node-cache';
-import { JsonIoService } from '../../shared/json.io.service';
-import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
+import { JsonIoService } from '../../../shared/json.io.service';
+import { ErrorStatusCode } from '../../../../infrastructure/format/status-code';
 
 // #region error
 export class SQLConnectionNotFoundError extends Error implements ErrorStatusCode {

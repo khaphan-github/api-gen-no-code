@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
 import { WorkspaceConnectionShouldNotBeEmpty } from '../../shared/errors/workspace-connection-empty.error';
 import NodeCache from 'node-cache';
+import { ConfigService } from '@nestjs/config';
 
 // #region error
 export class WorkspaceConnectionNotFound extends Error implements ErrorStatusCode {
@@ -24,8 +25,8 @@ export class GetWorkspaceConnectionQueryHandler
   implements IQueryHandler<GetWorkspaceConnectionQuery>
 {
   constructor(
-    private readonly jsonIO: JsonIoService,
     private readonly nodeCache: NodeCache,
+    private readonly configService: ConfigService,
   ) {
   }
   // TODO: In future need to chage way to get this connetions/ get from sheet... same same,
@@ -47,8 +48,8 @@ export class GetWorkspaceConnectionQueryHandler
     let workspaceDBConfig: DataSourceOptions | PromiseLike<DataSourceOptions>;
 
     try {
-      workspaceDBConfig =
-        this.jsonIO.readJsonFile<DataSourceOptions>(workspaceId.toString());
+      // TODO: Get from env;
+      workspaceDBConfig = this.getDatabaseConfig();
 
       this.nodeCache.set(workspaceId, workspaceDBConfig);
     } catch (error) {
@@ -60,5 +61,17 @@ export class GetWorkspaceConnectionQueryHandler
     }
 
     return Promise.resolve(workspaceDBConfig);
+  }
+
+  private readonly getDatabaseConfig = () => {
+    const databaseConfig: DataSourceOptions = {
+      type: this.configService.get<string>('relationaldb.type') as any,
+      host: this.configService.get<string>('relationaldb.host') as any,
+      port: this.configService.get<number>('relationaldb.port') as any,
+      username: this.configService.get<string>('relationaldb.username'),
+      password: this.configService.get<string>('relationaldb.password') as any,
+      database: this.configService.get<string>('relationaldb.database') as any,
+    };
+    return databaseConfig;
   }
 }

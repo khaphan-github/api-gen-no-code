@@ -15,15 +15,19 @@ import { SQLToAPIService } from './services/sql-to-api.service';
 import { FileReaderService } from '../shared/file-reader.service';
 import { CrudModule } from '../crud-pg/crud.module';
 import { ExecutedSQLQueryEventHandler } from '../crud-pg/handlers/executed-query.handler';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
     imports: [
         CqrsModule,
         HttpModule,
+        ConfigModule,
         TypeOrmModule.forFeature(),
-        CrudModule
+        CrudModule,
     ],
-    controllers: [GeneratorController,],
+    controllers: [
+        GeneratorController,
+    ],
     providers: [
         ...CommandHandlers,
         ...QueryHandlers,

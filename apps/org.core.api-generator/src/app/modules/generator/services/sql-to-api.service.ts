@@ -2,12 +2,14 @@ import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ExecuteScriptCommand } from "../commands/execute-script.command";
 
-import { GetSQLConnectionQuery } from "../queries/get-asserts-sql-connections.query";
-import { GetSQLScriptQuery } from "../queries/get-asserts-sql-script.query";
+import { GetSQLConnectionQuery } from "../queries/sql-to-api/get-asserts-sql-connections.query";
+import { GetSQLScriptQuery } from "../queries/sql-to-api/get-asserts-sql-script.query";
 import { CreateWorkspaceCommand } from "../commands/create-workspace.command";
 import { CreateApplicationCommand } from "../commands/create-app.command";
 import { WORKSPACE_VARIABLE } from "../../shared/variables/workspace.variable";
 import { CrudService } from "../../crud-pg/services/crud-pg.service";
+import { GetCreateAuthTableScriptQuery } from "../queries/sql-to-api/get-asserts-auth-script.query";
+import { RunScriptCommand } from "../commands/run-script-command";
 
 @Injectable()
 export class SQLToAPIService implements OnApplicationBootstrap {
@@ -25,10 +27,12 @@ export class SQLToAPIService implements OnApplicationBootstrap {
   //#region api to sql
   executeScriptFromSqlFile = async () => {
     try {
-      const [connection, script] = await Promise.all([
+      const [connection, script, authscript] = await Promise.all([
         this.queryBus.execute(new GetSQLConnectionQuery()),
         this.queryBus.execute(new GetSQLScriptQuery()),
+        this.queryBus.execute(new GetCreateAuthTableScriptQuery()),
       ]);
+
       const { type, database, host, password, port, username } = connection;
       this.logger.debug(`Get config database.sql and connection.json success!`);
 
@@ -66,6 +70,12 @@ export class SQLToAPIService implements OnApplicationBootstrap {
 
       this.logger.debug(`Found application ${WORKSPACE_VARIABLE.APP_ID}!`);
 
+      await this.commandBus.execute(
+        new RunScriptCommand(
+          connection, authscript
+        )
+      );
+
       const executeResult = await this.commandBus.execute(
         new ExecuteScriptCommand(
           connection,
@@ -74,13 +84,15 @@ export class SQLToAPIService implements OnApplicationBootstrap {
           { script: script }
         )
       );
+
       this.logger.debug(`Execute script success success!`);
       if (executeResult) {
         this.logger.log(`GENNERATE API SUCCESS`);
       }
     } catch (error) {
       //
+      console.log(error);
     }
   }
   //#endregion api to sql
-} 
+}

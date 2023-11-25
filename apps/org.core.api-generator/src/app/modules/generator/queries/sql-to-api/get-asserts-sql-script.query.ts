@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import NodeCache from 'node-cache';
-import { FileReaderService } from '../../shared/file-reader.service';
-import { ErrorStatusCode } from '../../../infrastructure/format/status-code';
+import { FileReaderService } from '../../../shared/file-reader.service';
+import { ErrorStatusCode } from '../../../../infrastructure/format/status-code';
 
 // #region error
 export class SQLScripFileNotFoundError extends Error implements ErrorStatusCode {

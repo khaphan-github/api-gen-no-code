@@ -26,19 +26,17 @@ export class RunScriptCommandHandler
   async execute(command: RunScriptCommand) {
     const { script, workspaceConnections } = command;
 
-    // TODO: Check SQL query to make source it can't exe cute with dât they have no prermission.
-
     let typeormDataSource: DataSource;
     try {
       typeormDataSource = await new DataSource(workspaceConnections).initialize();
       const queryResult = await typeormDataSource.query(script);
+      console.log(queryResult);
+      await typeormDataSource?.destroy();
       return queryResult;
     } catch (error) {
-      await typeormDataSource.destroy();
+      await typeormDataSource?.destroy();
       this.logger.error(error);
       return error;
-    } finally {
-      await typeormDataSource.destroy();
     }
   }
 }
