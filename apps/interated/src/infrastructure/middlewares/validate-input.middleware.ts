@@ -1,11 +1,10 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 @Injectable()
-export class ValidateInputMiddleware implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler) {
-    // TODO: Check logic vlidate appkey
-    // Gọi thông tin của mấy bảng trong db để check input có hợp lệ hay không
-    console.log('ValidateInputMiddleware executed.');
-    return next.handle();
+export class ValidateInputMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log(`Logger Middleware: ValidateInputMiddleware...`);
+    next();
   }
 }

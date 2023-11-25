@@ -1,10 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 @Injectable()
-export class CustomizeInputMiddleware implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler) {
-    // TODO: Biến đỗi dữ liệu người dùng truyền vào thành kiểu nó quy định123
-    console.log('CustomizeInputMiddleware executed.');
-    return next.handle();
+export class CustomizeInputMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log(`Logger Middleware: CustomizeInputMiddleware...`);
+    next();
   }
 }

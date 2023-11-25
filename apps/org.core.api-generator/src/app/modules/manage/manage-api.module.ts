@@ -7,15 +7,18 @@ https://docs.nestjs.com/modules
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { GeneratorModule } from '../generator/generator.module';
+import { CrudModule } from '../crud-pg/crud.module';
 @Module({
-    imports: [
-        GeneratorModule,
-        CqrsModule,
-    ],
-    controllers: [
-        ManageApiController,
-    ],
-    providers: [
-        ManageApiService,],
+  imports: [
+    GeneratorModule,
+    CqrsModule,
+    CrudModule,
+  ],
+  controllers: [
+    ManageApiController,
+  ],
+  providers: [
+    ManageApiService,],
+  exports: [ManageApiService]
 })
 export class ManageApiModule { }

@@ -1,12 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 @Injectable()
-export class AuthorizationMiddleware implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler) {
-    // TODO: Chêck logic if they have token - check in table role user and role,
-    // Lấy tất cả quyền của user (Cache đống này) , Kiểm tra user có vào được api đó không?
-    // Nếu có thì next còn không thì không next,
-    console.log('AuthorizationMiddleware executed.');
-    return next.handle();
+export class AuthorizationMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log(`Logger Middleware: AuthorizationMiddleware...`);
+    next();
   }
 }

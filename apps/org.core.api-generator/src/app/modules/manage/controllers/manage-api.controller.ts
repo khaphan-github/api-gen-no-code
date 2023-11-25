@@ -15,12 +15,10 @@ export class ManageApiController {
   @Post('connect')
   async connectToServer(@Body() body: ConnectToServerDTO) {
     try {
-      const info = await this.service.getServerInfo(body);
-      return new ResponseBase(200, 'Get create data base script success', info);
-
+      const info = this.service.getServerInfo(body);
+      return new ResponseBase(200, 'Get create data base script success', { valid: info });
     } catch (error) {
-      return new ResponseBase(601, error.message);
+      return new ResponseBase(401, error.message);
     }
   }
-
 }

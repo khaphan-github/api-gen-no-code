@@ -6,10 +6,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { SwaggerModule } from '@nestjs/swagger';
 import { CONFIG_SWAGGER } from './config/swagger.config';
-import { AuthenticateMiddleware } from './infrastructure/middlewares/auth.middleware';
-import { AuthorizationMiddleware } from './infrastructure/middlewares/authorization.middleware';
-import { ValidateInputMiddleware } from './infrastructure/middlewares/validate-input.middleware';
-import { CustomizeInputMiddleware } from './infrastructure/middlewares/customize-input.middleware';
 
 async function bootstrap() {
 
@@ -21,12 +17,6 @@ async function bootstrap() {
   app.setViewEngine('hbs');
   // Provider html page to display api docs
 
-  // Middleware
-  app.useGlobalInterceptors(new AuthenticateMiddleware());
-  app.useGlobalInterceptors(new AuthorizationMiddleware());
-  app.useGlobalInterceptors(new ValidateInputMiddleware());
-  app.useGlobalInterceptors(new CustomizeInputMiddleware());
-  // Middleware
 
   app.enableCors();
 

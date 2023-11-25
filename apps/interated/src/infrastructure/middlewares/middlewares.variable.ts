@@ -10,3 +10,10 @@ export class UserMetadata {
   iat: number;
   exp: number;
 }
+
+
+export const API_WHITE_LIST = [
+  '/api/v1/connect',
+  '/api/v1/login',
+  '/api/v1/register',
+]
