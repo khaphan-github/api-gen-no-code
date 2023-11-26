@@ -12,7 +12,7 @@ export class AuthorizationMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     if (req['is_white_list'] || req['auth_with_config_mode']) {
-      this.logger.log(`\nPass authorize because white list or config mode\n API: ${req.baseUrl}`)
+      this.logger.log(`\nPass authorize because white list or config mode\nAPI: ${req.baseUrl}`)
       return next();
     }
 

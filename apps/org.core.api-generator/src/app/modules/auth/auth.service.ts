@@ -10,7 +10,7 @@ import { CrudService } from '../crud-pg/services/crud-pg.service';
 import { WORKSPACE_VARIABLE } from '../shared/variables/workspace.variable';
 import { JwtService } from '@nestjs/jwt';
 import { BCryptService } from './bscript.service';
-import { WrongUsernameOrPasswordError } from './errors/login..error';
+import { AccountIsLockedError, WrongUsernameOrPasswordError } from './errors/login..error';
 import { ITokenPayLoad, IUserLogin } from './interfaces/user-login.interface';
 import { RegisterDTO } from './dtos/register.dto';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,6 +19,7 @@ import NodeCache from 'node-cache';
 import { AUTH_CACHE_KEY } from './variables/cache.const';
 import { PolicyModel } from './model/policy.model';
 import { Request } from 'express';
+import _ from 'lodash';
 
 @Injectable()
 export class AuthService {
@@ -67,16 +68,23 @@ export class AuthService {
       appid: appId,
       schema: '_core_account'
     }, {
-      selects: ['id', 'metadata', 'username', 'password']
+      selects: ['id', 'metadata', 'username', 'password', 'enable']
     }, {
       and: [
-        { username: username },
+        {
+          username: username,
+        },
       ]
     });
     const foundUser = userInSystem[0];
 
+
     if (!foundUser) {
       return Promise.reject(new WrongUsernameOrPasswordError());
+    }
+
+    if (foundUser?.enable == false) {
+      return Promise.reject(new AccountIsLockedError());
     }
 
     const isRightPassword = await this.bscriptService.comparePassword(password, foundUser.password);
@@ -121,17 +129,14 @@ export class AuthService {
     const appId = WORKSPACE_VARIABLE.APP_ID.toString();
 
     const passwordHashed = await this.bscriptService.hashPassword(password);
-    const workspaceConfig = await this.crudService.query({
+    const roles = await this.crudService.query({
       appid: appId,
-      schema: '_core_workspace_config'
+      schema: '_core_role'
     }, {
-      selects: ['id', 'genneral_config']
-    }, {
-      id: WORKSPACE_VARIABLE.WORKSPACE_ID.toString()
-    });
+      selects: ['id', 'metadata']
+    }, {});
 
-    const foundWorkspace = workspaceConfig[0];
-    const defaultRoleOfAccountWhenRegister = foundWorkspace.genneral_config.defaultRoleOfAccountWhenRegister;
+    const arrayRoleDefautlWhenLogin = _.filter(roles, (role) => role.metadata?.defaultWhenRegister == true);
 
     const saveUserResult = await this.crudService.insert(appId, '_core_account',
       [{
@@ -139,7 +144,7 @@ export class AuthService {
         password: passwordHashed,
         metadata: {
           info: info,
-          roleIds: defaultRoleOfAccountWhenRegister
+          roleIds: arrayRoleDefautlWhenLogin.map((role) => role.id)
         },
         enable: true,
       }]);
