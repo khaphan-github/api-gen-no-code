@@ -5,15 +5,15 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CrudModule } from '../crud-pg/crud.module';
 import { BCryptService } from './bscript.service';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import NodeCache from 'node-cache';
 
 @Module({
   imports: [
     GeneratorModule,
     CqrsModule,
     CrudModule,
-
 
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -30,6 +30,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   providers: [
     AuthService,
     BCryptService,
+    NodeCache,
   ],
+  exports: [
+    AuthService,
+    JwtModule
+  ]
 })
 export class AuthModule { }

@@ -1,17 +1,20 @@
 import { HttpException, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
-import { API_WHITE_LIST } from './middlewares.variable';
+import { API_WHITE_LIST, TokenPayload } from './middlewares.variable';
 import { ManageApiService } from 'apps/org.core.api-generator/src/app/modules/manage/services/manage-api.service';
+import { AuthService } from 'apps/org.core.api-generator/src/app/modules/auth/auth.service';
+
 @Injectable()
 export class AuthenticateMiddleware implements NestMiddleware {
   constructor(
     private readonly mangageApiService: ManageApiService,
+    private readonly authService: AuthService,
   ) { }
 
-  use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     if (_.includes(API_WHITE_LIST, req.baseUrl)) {
-      console.log(`Exec api in white list`);
+      req['is_white_list'] = true;
       return next();
     }
 
@@ -24,17 +27,20 @@ export class AuthenticateMiddleware implements NestMiddleware {
           'action': 'Auth with config mode'
         }, 401)
       }
+      req['auth_with_config_mode'] = true;
       return next();
     }
 
-    // Case login by usabse mode
-    // TODO: Check is call request with config mode:
+    // Case exec api
     const authToken = req.header('Authenticate');
-    // Validate access token;
-
-
-    console.log(`Logger Middleware: Secret Key - ${secretKey}, Auth Token - ${secretKey}`);
-
-    return next();
+    try {
+      const verify = this.authService.verifyToken(authToken) as TokenPayload;
+      req['token_payload'] = verify;
+      return next();
+    } catch (error) {
+      throw new HttpException({
+        'message': 'Invalid access token',
+      }, 401)
+    }
   }
 }

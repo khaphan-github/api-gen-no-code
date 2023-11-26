@@ -10,6 +10,8 @@ import { CustomizeInputMiddleware } from '../infrastructure/middlewares/customiz
 import { ValidateInputMiddleware } from '../infrastructure/middlewares/validate-input.middleware';
 import { CrudModule } from 'apps/org.core.api-generator/src/app/modules/crud-pg/crud.module';
 import { ManageApiModule } from 'apps/org.core.api-generator/src/app/modules/manage/manage-api.module';
+import { AuthModule } from 'apps/org.core.api-generator/src/app/modules/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { ManageApiModule } from 'apps/org.core.api-generator/src/app/modules/man
     CqrsModule,
     CrudModule,
     ManageApiModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

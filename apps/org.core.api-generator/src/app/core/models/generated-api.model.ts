@@ -111,12 +111,12 @@ export class GeneratedApiModel {
     _info?.create_definitions?.forEach(item => {
       if (item.column) {
         const columnName = item?.column?.column?.toLocaleLowerCase();
-        requestBody[columnName] = 'your_data';
+        requestBody[columnName] = 'example_data';
       }
     });
 
     const tableName = (_info?.table[0]?.table as string)?.toLocaleLowerCase() ?? '';
-    const apiPath = `/api/v1/app/${appId}/schema/${tableName}`;
+    const apiPath = `/schema/${tableName}`;
 
     const { ACTION, API_PATH, APP_ID, AUTHENTICATION, CREATED_AT, ENABLE, HEADERS, HTTP_METHOD,
       REQUEST_BODY, RESPONSE_ATTRIBUTES, TABLE_NAME, UPDATED_AT, REQUEST_PARAMS } = EGeneratedApisTableColumns;
