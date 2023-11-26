@@ -10,16 +10,20 @@ import { RelationalDbConfig } from './infrastructure/env/relational-db.config';
 import { TypeOrmPostgresConfig } from './infrastructure/env/postgres-typeorm.config';
 import { ManageApiModule } from './modules/manage/manage-api.module';
 import { AppEnvironmentConfig } from './infrastructure/env/app.env.config';
+import { AuthModule } from './modules/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 const FEATUREMODULES = [
   CrudModule,
   GeneratorModule,
   ManageApiModule,
+  AuthModule,
 ]
 
 @Module({
   imports: [
     ...FEATUREMODULES,
+
     ConfigModule.forRoot({
       isGlobal: true,
       load: [
@@ -28,11 +32,14 @@ const FEATUREMODULES = [
       ]
     }),
 
+
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: TypeOrmPostgresConfig,
     }),
+
   ],
   providers: [
     JsonIoService,

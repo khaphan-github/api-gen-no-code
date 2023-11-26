@@ -1,6 +1,4 @@
 import { HttpException, Injectable, NestMiddleware } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CrudService } from 'apps/org.core.api-generator/src/app/modules/crud-pg/services/crud-pg.service';
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
 import { API_WHITE_LIST } from './middlewares.variable';
@@ -13,12 +11,13 @@ export class AuthenticateMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     if (_.includes(API_WHITE_LIST, req.baseUrl)) {
+      console.log(`Exec api in white list`);
       return next();
     }
 
     // Case request with secret key.
     const secretKey = req.header('X-Secretkey');
-    if (secretKey !== null && secretKey.length !== 0) {
+    if (secretKey && secretKey?.length !== 0) {
       if (!this.mangageApiService.isValidSecetKey(secretKey)) {
         throw new HttpException({
           'message': 'Secretkey invalid, please auth to exec this api',

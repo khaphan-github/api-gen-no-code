@@ -3,17 +3,33 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { GeneratorModule } from '../generator/generator.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { CrudModule } from '../crud-pg/crud.module';
+import { BCryptService } from './bscript.service';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     GeneratorModule,
     CqrsModule,
+    CrudModule,
+
+
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('app.jwt.privateKey'),
+        signOptions: { expiresIn: '1d', algorithm: 'RS256' },
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [
     AuthController
   ],
   providers: [
     AuthService,
+    BCryptService,
   ],
 })
-export class ManageApiModule { }
+export class AuthModule { }

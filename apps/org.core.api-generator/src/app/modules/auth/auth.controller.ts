@@ -2,26 +2,33 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Post } from '@nestjs/common';
-import { UserLoginDTO } from './auth.dto';
+import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { UserLoginDTO } from './dtos/auth.dto';
 import { AuthService } from './auth.service';
-import { ResponseBase } from '../../infrastructure/format/response.base';
+import { ErrorBase, ResponseBase } from '../../infrastructure/format/response.base';
+import { RegisterDTO } from './dtos/register.dto';
 
 @Controller()
 export class AuthController {
   constructor(private readonly service: AuthService) { }
+
   @Post(`login`)
-  login(@Body() userLoginDto: UserLoginDTO) {
+  async login(@Body() userLoginDto: UserLoginDTO) {
     try {
-      const loginResult = this.service.login(userLoginDto);
+      const loginResult = await this.service.login(userLoginDto);
       return new ResponseBase(200, `Login successs`, loginResult);
     } catch (error) {
-      return new ResponseBase(401, `Login failure`, error);
+      throw new HttpException(new ErrorBase(error), HttpStatus.UNAUTHORIZED);
     }
   }
 
   @Post(`register`)
-  register() {
-    //
+  async register(@Body() register: RegisterDTO) {
+    try {
+      const registerResult = await this.service.register(register);
+      return new ResponseBase(200, `Register successs`, registerResult);
+    } catch (error) {
+      throw new HttpException(new ErrorBase(error), HttpStatus.BAD_REQUEST);
+    }
   }
 }

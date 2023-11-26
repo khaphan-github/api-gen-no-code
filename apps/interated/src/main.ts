@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { InteratedAppModule } from './app/interated-app.module';
@@ -19,6 +19,9 @@ async function bootstrap() {
 
 
   app.enableCors();
+  app.useGlobalPipes(
+    new ValidationPipe({ transform: true, forbidUnknownValues: true }),
+  );
 
   const globalPrefix = 'api/v1/';
   app.setGlobalPrefix(globalPrefix);

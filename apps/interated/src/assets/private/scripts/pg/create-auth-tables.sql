@@ -1,10 +1,10 @@
 CREATE TABLE
     IF NOT EXISTS _core_account (
         id SERIAL PRIMARY KEY,
-        username VARCHAR(255),
+        username VARCHAR(255) UNIQUE,
         password VARCHAR(255),
         metadata JSONB,
-        enable BOOLEAN,
+        enable BOOLEAN DEFAULT true,
         created_at timestamp(0) without time zone DEFAULT NOW(),
         updated_at timestamp(0) without time zone DEFAULT NOW()
     );

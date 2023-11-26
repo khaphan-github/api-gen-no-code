@@ -8,8 +8,5 @@ export class AppService {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly configService: ConfigService,
-  ){}
-  getApiDocument() {
-    return { message: 'Hello API' };
-  }
+  ) { }
 }
